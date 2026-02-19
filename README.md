@@ -16,3 +16,20 @@ Healthcare prior authorization requires consulting complex coverage policies dis
 ## Data
 
 Uses publicly available [CMS Medicare Coverage Database](https://www.cms.gov/medicare-coverage-database/search.aspx) (Local Coverage Determinations, National Coverage Determinations, and billing Articles). Policy documents are chunked at the paragraph level and embedded using sentence-transformers. Synthetic PA request scenarios are generated with deterministic oracle decisions.
+
+## Mock Simulator
+
+`tests/mock_simulator.py` is a self-contained fake PA simulator that replicates the real `PASimulator` API. It lets the RL environment and agent be developed and tested before the real data pipeline is ready.
+
+**Useful for all workstreams:**
+- **RL Environment** -- build and test `rl/env.py` against the mock API
+- **Baselines** -- run baseline policies on mock episodes
+- **Evaluation** -- test the evaluation harness end-to-end
+
+**Run the self-test:**
+
+```bash
+python -m tests.mock_simulator
+```
+
+This exercises all oracle decision paths (approve/deny/pend), request generation, chunk retrieval, and error handling. The mock will be replaced when the real simulator is integrated.
