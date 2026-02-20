@@ -20,6 +20,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 from rl.features import StateEncoder, EMBEDDING_DIM
+from rl.reward import RewardFunction
+
 class PolicyRetrievalEnv(gym.Env):
     """Gym environment for the prior authorization policy retrieval MDP.
 
@@ -42,13 +44,14 @@ class PolicyRetrievalEnv(gym.Env):
         - oracle_decision(request, chunks) -> str
     top_k : int
         Number of retrieval candidates presented to the agent each step.
-    step_cost : float
-        Per-retrieval cost subtracted from the reward (lambda in the EDD).
     max_steps : int
         Maximum retrieval steps before the episode is forcibly terminated.
     state_encoder : StateEncoder or None
         Pluggable state encoder (EDD Decision 8). Defaults to the base
         768-dim encoder (Option 1). Pass a subclass for Options 2/3.
+    reward_fn : RewardFunction or None
+        Pluggable reward function (EDD 5.2). Defaults to step cost 0.1
+        and +/-1.0 terminal correctness. Pass a subclass for alternatives.
     """
 
     # Required by gym.Env. Lists supported rendering modes; we have none
@@ -59,17 +62,17 @@ class PolicyRetrievalEnv(gym.Env):
         self,
         simulator: Any,
         top_k: int = 10,
-        step_cost: float = 0.1,
         max_steps: int = 20,
         state_encoder: Optional[StateEncoder] = None,
+        reward_fn: Optional[RewardFunction] = None,
     ) -> None:
         super().__init__()
 
         self._sim = simulator
         self._top_k = top_k
-        self._step_cost = step_cost   # lambda in EDD 5.2; ablated over {0.05, 0.1, 0.2}
         self._max_steps = max_steps   # safety bound; corpus has 20 chunks in the mock
         self._encoder = state_encoder or StateEncoder()
+        self._reward_fn = reward_fn or RewardFunction()  # default: 0.1 step cost
 
         # Gym spaces -- observation dim is determined by the encoder,
         # so switching to a larger state (Decision 8) auto-updates this.
@@ -228,7 +231,7 @@ class PolicyRetrievalEnv(gym.Env):
             "chunks_retrieved": len(self._retrieved_chunks),
             "last_chunk_type": chunk.section_type,
         }
-        return obs, -self._step_cost, False, False, info
+        return obs, self._reward_fn.step_reward(), False, False, info
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -261,7 +264,9 @@ class PolicyRetrievalEnv(gym.Env):
             agent_decision = "pend"
 
         correct = agent_decision == self._ground_truth
-        decision_reward = 1.0 if correct else -1.0
+        decision_reward = self._reward_fn.terminal_reward(
+            agent_decision, self._ground_truth,
+        )
 
         obs = self._encoder.encode(
             self._query_embedding, self._retrieved_chunks, self._candidates,

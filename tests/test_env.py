@@ -20,7 +20,7 @@ def _run_tests() -> None:
     print("=" * 70)
 
     sim = MockPASimulator(num_chunks=20, seed=42)
-    env = PolicyRetrievalEnv(simulator=sim, top_k=10, step_cost=0.1, max_steps=20)
+    env = PolicyRetrievalEnv(simulator=sim, top_k=10, max_steps=20)
 
     # --- 1. Basic reset ---
     print("\n[Test 1] Reset and initial observation")
@@ -57,7 +57,7 @@ def _run_tests() -> None:
     # --- 3. Max steps termination ---
     print("\n[Test 3] Max steps forced termination")
     small_env = PolicyRetrievalEnv(
-        simulator=sim, top_k=10, step_cost=0.1, max_steps=3,
+        simulator=sim, top_k=10, max_steps=3,
     )
     obs, info = small_env.reset(options={"procedure_code": "29881"})
     for step_i in range(3):
