@@ -6,6 +6,19 @@ A reinforcement learning framework that learns adaptive retrieval strategies for
 
 Healthcare prior authorization requires consulting complex coverage policies distributed across multiple documents. Traditional RAG systems use static retrieval strategies that are inefficient and miss decisive information. This project formulates adaptive policy retrieval as a **Markov Decision Process** and trains policies using **offline RL (Conservative Q-Learning)** on logged trajectories.
 
+## Setup
+
+```bash
+# Create and activate conda environment
+conda create -n pa-rl python=3.10 -y
+conda activate pa-rl
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+After activation, all commands in this README should be run from the repository root.
+
 ### Key Components
 
 - **PA Simulator** — Generates synthetic prior authorization requests with deterministic oracle decisions based on CMS Medicare coverage rules

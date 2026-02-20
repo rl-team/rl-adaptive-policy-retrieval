@@ -1,4 +1,14 @@
-numpy
+
+# Core dependencies for rl-adaptive-policy-retrieval
+#
+# Future phases will add:
+#   torch               (CQL agent, R7+)
+#   sentence-transformers (real state encoder, features.py)
+#   tensorboard          (training visualization)
+#   matplotlib, seaborn  (evaluation plots)
+
+numpy>=1.24,<2.0
+gym==0.26.2
 sentence-transformers
 torch
 pytest
