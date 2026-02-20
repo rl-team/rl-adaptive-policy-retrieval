@@ -73,9 +73,11 @@ obs, reward, done, truncated, info = env.step(10)  # stop and get decision
 
 Both `StateEncoder` (`rl/features.py`) and `RewardFunction` (`rl/reward.py`) are pluggable -- pass custom subclasses to the env constructor for ablation experiments.
 
-**Run tests:**
+**Run tests and demo:**
 
 ```bash
-python -m tests.test_env
-python -m tests.test_reward
+python -m tests.mock_simulator       # mock simulator self-test
+python -m tests.test_env             # env tests (8 cases)
+python -m tests.test_reward          # reward tests (6 cases)
+python -m scripts.random_policy_demo # random policy, 10 episodes
 ```
