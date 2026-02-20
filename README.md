@@ -46,3 +46,34 @@ python -m tests.mock_simulator
 ```
 
 This exercises all oracle decision paths (approve/deny/pend), request generation, chunk retrieval, and error handling. The mock will be replaced when the real simulator is integrated.
+
+## RL Environment
+
+`rl/env.py` implements `PolicyRetrievalEnv`, a standard Gym environment wrapping the simulator as an MDP.
+
+**MDP summary:**
+- **Observation:** 768-dim vector (request embedding + mean-pooled chunk embeddings)
+- **Actions:** `Discrete(K+1)` -- select from K candidates or stop retrieval
+- **Rewards:** `-lambda` per retrieval step, `+/-1.0` terminal for correct/incorrect decision
+
+**Usage:**
+
+```python
+from tests.mock_simulator import MockPASimulator
+from rl.env import PolicyRetrievalEnv
+
+sim = MockPASimulator(num_chunks=20, seed=42)
+env = PolicyRetrievalEnv(simulator=sim, top_k=10, step_cost=0.1)
+
+obs, info = env.reset()
+obs, reward, done, truncated, info = env.step(0)   # retrieve top candidate
+obs, reward, done, truncated, info = env.step(10)  # stop and get decision
+```
+
+The state encoder is pluggable (see `StateEncoder` class in `rl/env.py`), allowing experiments with different observation sizes per EDD Decision 8.
+
+**Run tests:**
+
+```bash
+python -m tests.test_env
+```
