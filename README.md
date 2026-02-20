@@ -61,19 +61,21 @@ This exercises all oracle decision paths (approve/deny/pend), request generation
 ```python
 from tests.mock_simulator import MockPASimulator
 from rl.env import PolicyRetrievalEnv
+from rl.reward import RewardFunction
 
 sim = MockPASimulator(num_chunks=20, seed=42)
-env = PolicyRetrievalEnv(simulator=sim, top_k=10, step_cost=0.1)
+env = PolicyRetrievalEnv(simulator=sim, top_k=10)
 
 obs, info = env.reset()
 obs, reward, done, truncated, info = env.step(0)   # retrieve top candidate
 obs, reward, done, truncated, info = env.step(10)  # stop and get decision
 ```
 
-The state encoder is pluggable (see `StateEncoder` class in `rl/env.py`), allowing experiments with different observation sizes per EDD Decision 8.
+Both `StateEncoder` (`rl/features.py`) and `RewardFunction` (`rl/reward.py`) are pluggable -- pass custom subclasses to the env constructor for ablation experiments.
 
 **Run tests:**
 
 ```bash
 python -m tests.test_env
+python -m tests.test_reward
 ```
