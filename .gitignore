@@ -27,3 +27,8 @@ Thumbs.db
 
 # Tensorboard logs
 runs/
+
+# CMS MCD data
+*.pdf
+*.mdb
+*.ldb
