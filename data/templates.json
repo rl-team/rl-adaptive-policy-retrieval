@@ -1,0 +1,26 @@
+{
+  "72148": {
+    "name": "MRI Lumbar Spine",
+    "common_diagnoses": [
+      {"code": "M54.5", "name": "Low back pain", "weight": 0.6},
+      {"code": "M51.26", "name": "Lumbar disc degeneration", "weight": 0.3},
+      {"code": "G89.29", "name": "Other chronic pain", "weight": 0.1}
+    ],
+    "age_range": [18, 85],
+    "typical_prior_treatments": ["physical_therapy", "NSAIDs", "chiropractic"],
+    "requires_diagnosis_prefix": ["M54", "M51"],
+    "requires_prior_treatments": ["physical_therapy", "chiropractic"]
+  },
+  "29881": {
+    "name": "Knee Arthroscopy",
+    "common_diagnoses": [
+      {"code": "M23.21", "name": "Derangement of meniscus", "weight": 0.5},
+      {"code": "M17.11", "name": "Primary osteoarthritis, right knee", "weight": 0.3},
+      {"code": "S83.511A", "name": "Sprain of ACL, right knee", "weight": 0.2}
+    ],
+    "age_range": [16, 75],
+    "typical_prior_treatments": ["physical_therapy", "corticosteroid_injection", "bracing"],
+    "requires_diagnosis_prefix": ["M23", "M17", "S83"],
+    "requires_prior_treatments": ["physical_therapy", "corticosteroid_injection"]
+  }
+}
