@@ -80,4 +80,23 @@ python -m tests.mock_simulator       # mock simulator self-test
 python -m tests.test_env             # env tests (8 cases)
 python -m tests.test_reward          # reward tests (6 cases)
 python -m scripts.random_policy_demo # random policy, 10 episodes
+python -m tests.test_q_network
+python -m tests.test_conservative_ql_agent
+```
+
+**Train on mock data (end-to-end pipeline test):**
+
+```bash
+python -m scripts.train_conservative_ql_mock
+```
+
+**Train on an offline dataset (with Tensorboard):**
+
+```bash
+python -m scripts.train_conservative_ql --dataset data/offline_buffer.pkl
+python -m scripts.train_conservative_ql --dataset data/offline_buffer.pkl \
+    --epochs 200 --alpha 0.5 --lr 1e-3 --output runs/experiment_01
+
+# Monitor training:
+tensorboard --logdir runs/
 ```
