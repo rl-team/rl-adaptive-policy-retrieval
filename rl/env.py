@@ -14,13 +14,15 @@ Reference: EDD 5.2 (PolicyRetrievalEnv), Use Cases 2-3.
 from __future__ import annotations
 
 import numpy as np
+
 import gym
 from gym import spaces
-from typing import Any, Dict, List, Optional, Set, Tuple
 
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from rl.features import StateEncoder, EMBEDDING_DIM
 from rl.reward import RewardFunction
+
 
 class PolicyRetrievalEnv(gym.Env):
     """Gym environment for the prior authorization policy retrieval MDP.
@@ -35,8 +37,7 @@ class PolicyRetrievalEnv(gym.Env):
     Parameters
     ----------
     simulator : object
-        A PA simulator instance exposing the following methods (duck-typed,
-        works with both MockPASimulator and the real PASimulator):
+        A PA simulator instance exposing the following methods:
         - generate_request(procedure_code=None) -> request
         - get_corpus() -> list of chunks
         - get_chunk(idx) -> chunk
@@ -52,6 +53,11 @@ class PolicyRetrievalEnv(gym.Env):
     reward_fn : RewardFunction or None
         Pluggable reward function (EDD 5.2). Defaults to step cost 0.1
         and +/-1.0 terminal correctness. Pass a subclass for alternatives.
+    query_encoder : callable or None
+        Injected function that maps text -> np.ndarray embedding.
+        Pass ``sim.encode`` when using the real PASimulator (sentence-
+        transformer). When ``None``, the env falls back to a deterministic
+        hash-based fake embedding for the MockPASimulator.
     """
 
     # Required by gym.Env. Lists supported rendering modes; we have none
@@ -65,6 +71,7 @@ class PolicyRetrievalEnv(gym.Env):
         max_steps: int = 20,
         state_encoder: Optional[StateEncoder] = None,
         reward_fn: Optional[RewardFunction] = None,
+        query_encoder: Optional[Callable[[str], np.ndarray]] = None,
     ) -> None:
         super().__init__()
 
@@ -73,6 +80,7 @@ class PolicyRetrievalEnv(gym.Env):
         self._max_steps = max_steps   # safety bound; corpus has 20 chunks in the mock
         self._encoder = state_encoder or StateEncoder()
         self._reward_fn = reward_fn or RewardFunction()  # default: 0.1 step cost
+        self._query_encoder = query_encoder
 
         # Gym spaces -- observation dim is determined by the encoder,
         # so switching to a larger state (Decision 8) auto-updates this.
@@ -94,6 +102,25 @@ class PolicyRetrievalEnv(gym.Env):
         self._query_embedding: Optional[np.ndarray] = None
         self._steps_taken: int = 0
         self._done: bool = True
+
+    # ------------------------------------------------------------------
+    # Public read-only properties
+    # ------------------------------------------------------------------
+
+    @property
+    def candidates(self) -> List[int]:
+        """Current top-K candidate corpus indices (read-only)."""
+        return list(self._candidates)
+
+    @property
+    def retrieved_chunks(self) -> list:
+        """Chunks retrieved so far in this episode (read-only)."""
+        return list(self._retrieved_chunks)
+
+    @property
+    def stop_action(self) -> int:
+        """The action index that triggers a stop (== top_k)."""
+        return self._top_k
 
     # ------------------------------------------------------------------
     # Gym API
@@ -134,9 +161,8 @@ class PolicyRetrievalEnv(gym.Env):
         self._done = False
 
         # Build a query embedding from the request.
-        # Use a deterministic hash of the request fields to create a
-        # reproducible query vector. In the real system this would come
-        # from the sentence-transformer encoder.
+        # Uses the injected query_encoder (real system) or a fallback
+        # deterministic hash (mock system).
         self._query_embedding = self._build_query_embedding(self._request)
 
         # Compute initial candidates
@@ -280,15 +306,17 @@ class PolicyRetrievalEnv(gym.Env):
         }
         return obs, decision_reward, True, False, info
 
-
     def _build_query_embedding(self, request: Any) -> np.ndarray:
-        """Create a deterministic query embedding from the PA request.
+        """Create a query embedding from the PA request.
 
-        In the real system, this would pass request.to_text() through a
-        sentence-transformer encoder. For now, we build a deterministic
-        768-dim vector seeded from the request fields so that the same
-        request always produces the same query.
+        Uses the injected query_encoder if available (real system with
+        sentence-transformer). Otherwise falls back to a deterministic
+        768-dim vector seeded from the request fields (mock system).
         """
+        if self._query_encoder is not None:
+            return self._query_encoder(request.to_text())
+
+        # Fallback for MockPASimulator: Deterministic 768-dim fake embedding
         # Hash request fields to get a deterministic seed. Modulo 2**31
         # keeps the value within numpy's seed range (non-negative 32-bit int).
         seed_str = (

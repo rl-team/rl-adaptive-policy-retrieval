@@ -17,6 +17,15 @@ class PARequest:
     urgency: str
     metadata: Dict[str, Any] = field(default_factory=dict)
 
+    def to_text(self) -> str:
+        """Human-readable summary for embedding (EDD 5.2)."""
+        return (
+            f"Procedure: {self.procedure_code}. "
+            f"Diagnoses: {', '.join(self.diagnosis_codes)}. "
+            f"Age: {self.patient_age}. "
+            f"Prior treatments: {', '.join(self.prior_treatments)}."
+        )
+
 
 @dataclass
 class PolicyChunk:

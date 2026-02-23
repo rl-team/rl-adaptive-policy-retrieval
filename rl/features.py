@@ -78,8 +78,10 @@ class StateEncoder:
 
         # Chunks component: mean-pool retrieved chunk embeddings (second half)
         if retrieved_chunks:
+            # Use [-HALF_DIM:] to handle both 768-dim fakes (takes last half)
+            # and 384-dim real embeddings (takes the whole array)
             chunk_embs = np.stack(
-                [c.embedding[HALF_DIM:] for c in retrieved_chunks],
+                [c.embedding[-HALF_DIM:] for c in retrieved_chunks],
                 axis=0,
             )
             chunks_emb = np.mean(chunk_embs, axis=0)

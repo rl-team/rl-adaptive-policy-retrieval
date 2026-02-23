@@ -30,6 +30,8 @@ After activation, all commands in this README should be run from the repository 
 
 Uses publicly available [CMS Medicare Coverage Database](https://www.cms.gov/medicare-coverage-database/search.aspx) (Local Coverage Determinations, National Coverage Determinations, and billing Articles). Policy documents are chunked at the paragraph level and embedded using sentence-transformers. Synthetic PA request scenarios are generated with deterministic oracle decisions.
 
+> **Note on Model Init Warnings**: When loading the real `all-MiniLM-L6-v2` transformer model, you may see an `embeddings.position_ids | UNEXPECTED` logging warning from SentenceTransformers. This is benign and expected when translating this model's weights into the PyTorch pipeline; it does not indicate a broken model.
+
 ## Mock Simulator
 
 `tests/mock_simulator.py` is a self-contained fake PA simulator that replicates the real `PASimulator` API. It lets the RL environment and agent be developed and tested before the real data pipeline is ready.
@@ -77,11 +79,10 @@ Both `StateEncoder` (`rl/features.py`) and `RewardFunction` (`rl/reward.py`) are
 
 ```bash
 python -m tests.mock_simulator       # mock simulator self-test
-python -m tests.test_env             # env tests (8 cases)
-python -m tests.test_reward          # reward tests (6 cases)
-python -m scripts.random_policy_demo # random policy, 10 episodes
-python -m tests.test_q_network
-python -m tests.test_conservative_ql_agent
+python -m tests.test_env             # env tests
+python -m tests.test_reward          # reward tests
+python -m scripts.random_policy_demo # random policy, mock env
+python -m scripts.validate_real_env  # validate env with real CMS data
 ```
 
 **Train on mock data (end-to-end pipeline test):**
@@ -90,9 +91,13 @@ python -m tests.test_conservative_ql_agent
 python -m scripts.train_conservative_ql_mock
 ```
 
-**Train on an offline dataset (with Tensorboard):**
+**Collect offline dataset and train:**
 
 ```bash
+# Collect 200 episodes using baseline behavior policies:
+python -m scripts.collect_offline_dataset --episodes 200
+
+# Train Conservative Q-Learning agent on the real dataset (with Tensorboard):
 python -m scripts.train_conservative_ql --dataset data/offline_buffer.pkl
 python -m scripts.train_conservative_ql --dataset data/offline_buffer.pkl \
     --epochs 200 --alpha 0.5 --lr 1e-3 --output runs/experiment_01
