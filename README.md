@@ -105,3 +105,19 @@ python -m scripts.train_conservative_ql --dataset data/offline_buffer.pkl \
 # Monitor training:
 tensorboard --logdir runs/
 ```
+
+**Evaluate a trained agent against baselines:**
+
+```bash
+# On-policy evaluation: Conservative Q-Learning greedy policy vs FixedK and Heuristic baselines
+python -m scripts.evaluate_agent --checkpoint runs/experiment_01/checkpoint.pt
+python -m scripts.evaluate_agent --checkpoint runs/experiment_01/checkpoint.pt \
+    --episodes 50 --seed 99
+```
+
+**Hyperparameter sweep:**
+
+```bash
+# Run 3 alpha/lr configurations and compare in Tensorboard:
+bash scripts/train_sweep.sh
+```
