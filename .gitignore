@@ -32,3 +32,4 @@ runs/
 *.pdf
 *.mdb
 *.ldb
+tb_out.log
