@@ -30,6 +30,8 @@ runs/
 
 # CMS MCD data
 *.pdf
+# Exception: publication figures (vector format for LaTeX)
+!figures/*.pdf
 *.mdb
 *.ldb
 tb_out.log
