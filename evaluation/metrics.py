@@ -1,35 +1,31 @@
 """
-Metrics for policy retrieval evaluation.
+metrics for policy retrieval evaluation using EDD metrics calculator
 
-Implements EDD Metrics Calculator:
 - Accuracy: num_correct / total_episodes
 - Avg Chunks: mean(num_chunks_retrieved)
 - Precision@K: retrieval quality (relevant chunks retrieved)
-- Cost-Adjusted Utility: accuracy - α * avg_chunks
+- Cost-Adjusted Utility: accuracy - alpha * avg_chunks
 
-Comparison method: mean and 95% confidence interval using bootstrap
-resampling (1000 samples). E.g. "Conservative Q-Learning achieves 94%
-accuracy (CI: 91-97%)".
-
-Reference: EDD "Evaluation Components (Hannah's Ownership)".
+comparison method: mean and 95% confidence interval using bootstrap
+resampling (1000 samples)
 """
 
 from __future__ import annotations
-
 from typing import Dict, List, Optional, Tuple
-
 import numpy as np
 
-
+# ---------------------------------------------------------------------------
+# Core metrics (EDD Metrics Calculator)
+# ---------------------------------------------------------------------------
 def accuracy(correct: List[bool]) -> float:
-    """Accuracy: num_correct / total_episodes."""
+    """accuracy: num_correct / total_episodes"""
     if not correct:
         return 0.0
     return float(np.mean(correct))
 
 
 def mean_chunks(chunks_per_episode: List[int]) -> float:
-    """Avg Chunks: mean(num_chunks_retrieved) per episode."""
+    """avg chunks: mean(num_chunks_retrieved) per episode"""
     if not chunks_per_episode:
         return 0.0
     return float(np.mean(chunks_per_episode))
@@ -40,7 +36,7 @@ def cost_adjusted_utility(
     chunks_per_episode: List[int],
     alpha: float = 0.1,
 ) -> float:
-    """Cost-Adjusted Utility: accuracy - α * avg_chunks (composite metric)."""
+    """cost-adjusted utility: accuracy - alpha * avg_chunks (composite metric)"""
     acc = accuracy(correct)
     avg_chunks = mean_chunks(chunks_per_episode)
     return acc - alpha * avg_chunks
@@ -51,24 +47,21 @@ def precision_at_k(
     relevant_per_episode: List[List[int]],
     k: Optional[int] = None,
 ) -> float:
-    """Precision@K: fraction of retrieved chunks that are relevant.
-
-    For retrieval quality (EDD: "are retrieved chunks relevant?").
-    If k is None, uses the number of chunks actually retrieved per episode.
-
-    Parameters
+    """precision@K: fraction of retrieved chunks that are relevant
+    if k is None, uses the number of chunks actually retrieved per episode
+    parameters
     ----------
     retrieved_per_episode : list of list of int
-        Retrieved chunk ids for each episode (in order retrieved).
+        retrieved chunk ids for each episode (in order retrieved)
     relevant_per_episode : list of list of int
-        Ground-truth relevant chunk ids for each episode.
+        ground-truth relevant chunk ids for each episode
     k : int or None
-        Consider only top-k retrieved. If None, use full retrieval set.
+        consider only top-k retrieved; if None, use full retrieval set
 
-    Returns
+    returns
     -------
     float
-        Mean over episodes of (|retrieved ∩ relevant| / min(k, |retrieved|)).
+        mean over episodes of (|retrieved ∩ relevant| / min(k, |retrieved|))
     """
     if len(retrieved_per_episode) != len(relevant_per_episode):
         raise ValueError("retrieved_per_episode and relevant_per_episode must have same length")
@@ -88,32 +81,36 @@ def precision_at_k(
     return float(np.mean(precisions))
 
 
+# ---------------------------------------------------------------------------
+# Bootstrap 95% CI (1000 samples per EDD)
+# ---------------------------------------------------------------------------
+
 def bootstrap_ci(
     values: np.ndarray,
     statistic_fn: str = "mean",
     n_bootstrap: int = 1000,
     confidence: float = 0.95,
 ) -> Tuple[float, float]:
-    """95% confidence interval using bootstrap resampling (1000 samples).
+    """95% confidence interval using bootstrap resampling (1000 samples)
 
     EDD: "For each metric, compute mean and 95% confidence interval
     using bootstrap resampling (1000 samples)."
 
-    Parameters
+    parameters
     ----------
     values : np.ndarray
-        One-dimensional array of per-episode values (e.g. 0/1 correct, or chunks).
+        one-dimensional array of per-episode values (e.g. 0/1 correct, or chunks)
     statistic_fn : str
-        One of "mean", "sum". Applied to each bootstrap sample.
+        one of "mean", "sum"; applied to each bootstrap sample
     n_bootstrap : int
-        Number of bootstrap samples (default 1000 per EDD).
+        number of bootstrap samples (default 1000 per EDD)
     confidence : float
-        Confidence level (default 0.95 for 95% CI).
+        confidence level (default 0.95 for 95% CI)
 
-    Returns
+    returns
     -------
     (lower, upper) : tuple
-        Confidence interval bounds.
+        confidence interval bounds
     """
     n = len(values)
     if n == 0:
@@ -138,6 +135,10 @@ def bootstrap_ci(
     return (lower, upper)
 
 
+# ---------------------------------------------------------------------------
+# Aggregate metrics + CIs
+# ---------------------------------------------------------------------------
+
 def compute_metrics(
     correct: List[bool],
     chunks_per_episode: List[int],
@@ -146,9 +147,9 @@ def compute_metrics(
     retrieved_per_episode: Optional[List[List[int]]] = None,
     relevant_per_episode: Optional[List[List[int]]] = None,
 ) -> Dict[str, float | Tuple[float, float]]:
-    """Compute all metrics with bootstrap 95% CIs.
+    """compute all metrics with bootstrap 95% CIs
 
-    Returns a dict with:
+    returns a dict with:
     - accuracy, accuracy_ci
     - mean_chunks, mean_chunks_ci
     - cost_adjusted_utility, cost_adjusted_utility_ci
@@ -182,7 +183,7 @@ def compute_metrics(
 
     if retrieved_per_episode is not None and relevant_per_episode is not None:
         prec = precision_at_k(retrieved_per_episode, relevant_per_episode)
-        # Bootstrap CI for precision: per-episode precision values
+        # per-episode precision values for bootstrap CI
         prec_per_ep = []
         for ret, rel in zip(retrieved_per_episode, relevant_per_episode):
             rel_set = set(rel)

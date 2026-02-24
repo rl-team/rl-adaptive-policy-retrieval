@@ -1,4 +1,12 @@
-"""Tests for evaluation.metrics (EDD Metrics Calculator)."""
+"""
+tests for evaluation.metrics -- verifies accuracy, mean chunks, cost-adjusted
+utility, precision@K, bootstrap CI, and compute_metrics (EDD Metrics Calculator)
+
+run with:
+    python -m tests.test_metrics
+"""
+
+from __future__ import annotations
 
 import numpy as np
 
@@ -12,45 +20,81 @@ from evaluation.metrics import (
 )
 
 
-def test_accuracy():
-    assert accuracy([True, True, False]) == 2 / 3
-    assert accuracy([True]) == 1.0
-    assert accuracy([]) == 0.0
+def _run_tests() -> None:
+    """verify the evaluation metrics"""
 
+    print("=" * 70)
+    print("  evaluation.metrics -- Tests")
+    print("=" * 70)
 
-def test_mean_chunks():
-    assert mean_chunks([3, 5, 4]) == 4.0
-    assert mean_chunks([]) == 0.0
+    # --- 1. Accuracy ---
+    print("\n[Test 1] accuracy: num_correct / total_episodes")
+    assert accuracy([True, True, False]) == 2 / 3, (
+        f"Expected 2/3, got {accuracy([True, True, False])}"
+    )
+    assert accuracy([True]) == 1.0, f"Expected 1.0, got {accuracy([True])}"
+    assert accuracy([]) == 0.0, f"Expected 0.0 for empty, got {accuracy([])}"
+    print(f"  accuracy([T,T,F]) = {accuracy([True, True, False]):.4f}")
+    print("  PASSED")
 
+    # --- 2. Mean chunks ---
+    print("\n[Test 2] mean_chunks: mean(num_chunks_retrieved)")
+    assert mean_chunks([3, 5, 4]) == 4.0, (
+        f"Expected 4.0, got {mean_chunks([3, 5, 4])}"
+    )
+    assert mean_chunks([]) == 0.0, f"Expected 0.0 for empty, got {mean_chunks([])}"
+    print(f"  mean_chunks([3,5,4]) = {mean_chunks([3, 5, 4])}")
+    print("  PASSED")
 
-def test_cost_adjusted_utility():
+    # --- 3. Cost-adjusted utility ---
+    print("\n[Test 3] cost_adjusted_utility: accuracy - alpha * avg_chunks")
     correct = [True, True, False]
     chunks = [2, 4, 6]
     u = cost_adjusted_utility(correct, chunks, alpha=0.1)
-    assert abs(u - (2 / 3 - 0.4)) < 1e-9
+    expected_u = 2 / 3 - 0.4
+    assert abs(u - expected_u) < 1e-9, f"Expected {expected_u}, got {u}"
+    print(f"  cost_adjusted_utility(..., alpha=0.1) = {u:.4f}")
+    print("  PASSED")
 
-
-def test_precision_at_k():
+    # --- 4. Precision@K ---
+    print("\n[Test 4] precision_at_k: retrieval quality (relevant chunks)")
     retrieved = [[1, 2, 3], [1, 2]]
     relevant = [[1, 2], [1, 2, 3]]
     p = precision_at_k(retrieved, relevant)
-    # ep0: 2/3 relevant; ep1: 2/2 relevant -> mean (2/3 + 1)/2
-    assert abs(p - (2 / 3 + 1) / 2) < 1e-9
+    expected_p = (2 / 3 + 1) / 2
+    assert abs(p - expected_p) < 1e-9, f"Expected {expected_p}, got {p}"
+    print(f"  precision_at_k(retrieved, relevant) = {p:.4f}")
+    print("  PASSED")
 
-
-def test_bootstrap_ci():
+    # --- 5. Bootstrap CI ---
+    print("\n[Test 5] bootstrap_ci: 95% CI with 1000 samples")
     values = np.ones(100) * 0.5
     low, high = bootstrap_ci(values, n_bootstrap=500)
-    assert low <= 0.5 <= high
+    assert low <= 0.5 <= high, f"Expected 0.5 in [{low}, {high}]"
+    print(f"  bootstrap_ci(constant 0.5, n=100): [{low:.4f}, {high:.4f}]")
+    print("  PASSED")
 
-
-def test_compute_metrics():
+    # --- 6. compute_metrics ---
+    print("\n[Test 6] compute_metrics: all metrics + CIs")
     correct = [True] * 80 + [False] * 20
     chunks = [3] * 50 + [5] * 50
     out = compute_metrics(correct, chunks, alpha=0.1, n_bootstrap=100)
-    assert out["accuracy"] == 0.8
-    assert out["mean_chunks"] == 4.0
-    assert out["cost_adjusted_utility"] == 0.8 - 0.1 * 4.0
-    assert out["n_episodes"] == 100
-    assert isinstance(out["accuracy_ci"], tuple)
-    assert len(out["accuracy_ci"]) == 2
+    assert out["accuracy"] == 0.8, f"Expected 0.8, got {out['accuracy']}"
+    assert out["mean_chunks"] == 4.0, f"Expected 4.0, got {out['mean_chunks']}"
+    assert out["cost_adjusted_utility"] == 0.8 - 0.1 * 4.0, (
+        f"Expected 0.4, got {out['cost_adjusted_utility']}"
+    )
+    assert out["n_episodes"] == 100, f"Expected 100, got {out['n_episodes']}"
+    assert isinstance(out["accuracy_ci"], tuple), "accuracy_ci should be tuple"
+    assert len(out["accuracy_ci"]) == 2, "accuracy_ci should be (lower, upper)"
+    print(f"  accuracy = {out['accuracy']:.2f}, ci = {out['accuracy_ci']}")
+    print(f"  mean_chunks = {out['mean_chunks']}, cost_adjusted_utility = {out['cost_adjusted_utility']:.2f}")
+    print("  PASSED")
+
+    print("\n" + "=" * 70)
+    print("  All tests passed")
+    print("=" * 70)
+
+
+if __name__ == "__main__":
+    _run_tests()

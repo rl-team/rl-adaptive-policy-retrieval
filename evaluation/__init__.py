@@ -1,8 +1,8 @@
 """
-Evaluation package for policy retrieval experiments.
+evaluation package for policy retrieval experiments
 
-Provides metrics (accuracy, avg chunks, cost-adjusted utility, bootstrap CI)
-per EDD "Evaluation Components (Hannah's Ownership)".
+provides metrics (accuracy, avg chunks, cost-adjusted utility, bootstrap CI)
+per EDD "Evaluation Components (Hannah's Ownership)"
 """
 
 from evaluation.metrics import (
