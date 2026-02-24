@@ -34,4 +34,5 @@ class PolicyChunk:
     text: str
     embedding: np.ndarray
     section_type: str
+    procedure_code: str = ""
     metadata: Dict[str, Any] = field(default_factory=dict)

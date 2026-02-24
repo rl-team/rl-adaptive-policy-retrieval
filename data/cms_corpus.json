@@ -110,5 +110,152 @@
     "section_type": "billing",
     "text": "Refer to CMS Publication 100-04, Medicare Claims Processing Manual , Chapter 30, revised 09/05/2008, for complete instructions. Specific coding information for this policy The physician/provider performing the procedure is responsible for identifying those patients for whom Medicare does not consider the procedure reasonable or necessary. Report CPT code 29999 (Unlisted procedure, arthroscopy) for arthroscopic lavage of the knee for treatment of osteoarthritis and/or arthroscopic debridement and lavage for patients with severe osteoarthritis. Report CPT code 29877 (Arthroscopy, knee, surgical; debridement/shaving of articular cartilage [chrondroplasty]) for arthroscopic debridement with presentation of knee pain only, or arthroscopic debridement without lavage for patients with severe osteoarthritis. Report HCPCS code G0289 for arthroscopy, knee, surgical, for removal of loose body, foreign body, debridement/shaving of articular cartilage (chondroplasty) at the time of other surgical knee arthroscopy in a different compartment of the same knee. For claims submitted to the Part B MAC: All services/procedures performed on the same day for the same beneficiary by the physician/provider should be billed on the same claim.",
     "procedure_code": "29881"
+  },
+  {
+    "chunk_id": "chunk_016",
+    "policy_id": "ncd-190.21",
+    "section_type": "coverage_criteria",
+    "text": "A comprehensive metabolic panel (CMP, CPT 80053) is covered when ordered by a treating physician for the evaluation of metabolic or endocrine disorders. The panel includes tests for glucose, calcium, sodium, potassium, chloride, carbon dioxide, blood urea nitrogen, creatinine, albumin, total protein, alkaline phosphatase, alanine aminotransferase, aspartate aminotransferase, and bilirubin. Coverage requires a documented diagnosis of diabetes mellitus, hyperlipidemia, or other metabolic condition.",
+    "procedure_code": "80053"
+  },
+  {
+    "chunk_id": "chunk_017",
+    "policy_id": "ncd-190.21",
+    "section_type": "coverage_criteria",
+    "text": "Screening laboratory tests including the comprehensive metabolic panel may be covered as part of the Welcome to Medicare visit or Annual Wellness Visit for eligible beneficiaries. For diagnostic purposes, the CMP is considered medically necessary when there is a documented clinical indication and the physician has provided an appropriate diagnosis code.",
+    "procedure_code": "80053"
+  },
+  {
+    "chunk_id": "chunk_018",
+    "policy_id": "ncd-190.21",
+    "section_type": "exclusions",
+    "text": "Routine screening laboratory tests without a documented medical indication are not covered under Medicare Part B. The comprehensive metabolic panel is not covered when ordered solely for administrative purposes such as employment screening or insurance applications.",
+    "procedure_code": "80053"
+  },
+  {
+    "chunk_id": "chunk_019",
+    "policy_id": "lcd-L35056",
+    "section_type": "coverage_criteria",
+    "text": "Computed Tomography (CT) of the chest with contrast (CPT 71260) is covered for the evaluation of pulmonary nodules, mediastinal masses, suspected pulmonary embolism, and staging of thoracic malignancies. A prior chest X-ray or other initial imaging study must be documented before authorization of CT chest.",
+    "procedure_code": "71260"
+  },
+  {
+    "chunk_id": "chunk_020",
+    "policy_id": "lcd-L35056",
+    "section_type": "coverage_criteria",
+    "text": "For solitary pulmonary nodules, CT chest is covered for initial characterization and follow-up surveillance per the Fleischner Society guidelines. Nodules less than 6mm in low-risk patients generally do not require follow-up CT. Nodules larger than 8mm may warrant CT-guided biopsy or PET/CT for further evaluation.",
+    "procedure_code": "71260"
+  },
+  {
+    "chunk_id": "chunk_021",
+    "policy_id": "lcd-L35056",
+    "section_type": "coverage_criteria",
+    "text": "CT chest with contrast is indicated for the evaluation of infectious processes including complicated pneumonia, empyema, and lung abscess when plain radiography is insufficient for diagnosis or treatment planning. Clinical documentation must demonstrate that initial antibiotic therapy has been administered.",
+    "procedure_code": "71260"
+  },
+  {
+    "chunk_id": "chunk_022",
+    "policy_id": "lcd-L35056",
+    "section_type": "exclusions",
+    "text": "CT chest is not covered for routine screening in asymptomatic patients except under the Low Dose CT Lung Cancer Screening program (NCD 210.14) which has separate eligibility criteria. Repeat CT imaging within 30 days of a prior CT study requires medical justification documenting a significant change in clinical status.",
+    "procedure_code": "71260"
+  },
+  {
+    "chunk_id": "chunk_023",
+    "policy_id": "lcd-L35056",
+    "section_type": "billing",
+    "text": "CT chest with contrast (71260) should not be billed with CT chest without contrast (71250) on the same date of service unless there is a documented clinical indication for both studies. When performed in conjunction with CT abdomen, use the appropriate combination codes.",
+    "procedure_code": "71260"
+  },
+  {
+    "chunk_id": "chunk_024",
+    "policy_id": "lcd-L33780",
+    "section_type": "coverage_criteria",
+    "text": "Lumbar spinal fusion (CPT 22633) is covered when conservative treatment has failed over a period of at least 6 months. Conservative treatment must include physical therapy, epidural steroid injections, and trial of non-steroidal anti-inflammatory medications. Documentation of failed conservative management is required.",
+    "procedure_code": "22633"
+  },
+  {
+    "chunk_id": "chunk_025",
+    "policy_id": "lcd-L33780",
+    "section_type": "coverage_criteria",
+    "text": "Pre-operative MRI or CT imaging of the lumbar spine must be performed within 6 months of the planned surgery date and must demonstrate the structural pathology correlating with the clinical symptoms. The imaging must show spondylolisthesis, spinal stenosis, or disc herniation at the proposed fusion level.",
+    "procedure_code": "22633"
+  },
+  {
+    "chunk_id": "chunk_026",
+    "policy_id": "lcd-L33780",
+    "section_type": "coverage_criteria",
+    "text": "For spondylolisthesis, fusion is covered when the slip is Grade II or higher on the Meyerding classification, or Grade I with documented instability on flexion-extension radiographs. The surgical plan must specify the fusion levels and must not exceed two motion segments without additional clinical justification.",
+    "procedure_code": "22633"
+  },
+  {
+    "chunk_id": "chunk_027",
+    "policy_id": "lcd-L33780",
+    "section_type": "coverage_criteria",
+    "text": "Coverage requires documentation from a board-certified spine surgeon or neurosurgeon. The operative report must include the specific diagnosis, levels to be fused, type of instrumentation, and graft material. A psychological evaluation is recommended for patients with chronic pain exceeding 12 months.",
+    "procedure_code": "22633"
+  },
+  {
+    "chunk_id": "chunk_028",
+    "policy_id": "lcd-L33780",
+    "section_type": "coverage_criteria",
+    "text": "Repeat or revision lumbar fusion surgery requires documentation of hardware failure, adjacent segment disease, or pseudarthrosis confirmed by imaging. New conservative treatment trials are required before authorization of revision surgery unless there is documented neurological emergency.",
+    "procedure_code": "22633"
+  },
+  {
+    "chunk_id": "chunk_029",
+    "policy_id": "lcd-L33780",
+    "section_type": "exclusions",
+    "text": "Lumbar spinal fusion is not covered for non-specific low back pain without documented structural pathology on imaging. Fusion for degenerative disc disease at more than 3 levels is considered investigational. Fusion in patients with active systemic infection or uncontrolled medical comorbidities is contraindicated.",
+    "procedure_code": "22633"
+  },
+  {
+    "chunk_id": "chunk_030",
+    "policy_id": "lcd-L33780",
+    "section_type": "exclusions",
+    "text": "Cervical or thoracic fusion procedures are not covered under this LCD. Artificial disc replacement as an alternative to fusion has separate coverage criteria under a different LCD. Motion-preserving devices are considered investigational for multi-level disease.",
+    "procedure_code": "22633"
+  },
+  {
+    "chunk_id": "chunk_031",
+    "policy_id": "lcd-L33780",
+    "section_type": "billing",
+    "text": "Lumbar fusion billing requires modifier 22 when the procedure complexity exceeds usual by a significant degree. Instrumentation (CPT 22842) and bone graft harvesting (CPT 20937) should be reported separately. The total operative time and number of levels fused must be documented.",
+    "procedure_code": "22633"
+  },
+  {
+    "chunk_id": "chunk_032",
+    "policy_id": "admin-100-01",
+    "section_type": "coverage_criteria",
+    "text": "Medicare Part B covers medically necessary services and preventive services. Medically necessary services are defined as services or supplies needed to diagnose or treat a medical condition and that meet accepted standards of medical practice.",
+    "procedure_code": "general"
+  },
+  {
+    "chunk_id": "chunk_033",
+    "policy_id": "admin-100-01",
+    "section_type": "coverage_criteria",
+    "text": "Prior authorization is required for certain Medicare Part B services as specified by CMS. The prior authorization process ensures that services meet Medicare coverage requirements before they are provided. Providers must submit clinical documentation supporting medical necessity.",
+    "procedure_code": "general"
+  },
+  {
+    "chunk_id": "chunk_034",
+    "policy_id": "admin-100-02",
+    "section_type": "coverage_criteria",
+    "text": "Evidence-based clinical guidelines should be used to support prior authorization decisions. The American Medical Association and specialty societies publish guidelines that inform coverage determinations. Payers should reference the most current published guidelines.",
+    "procedure_code": "general"
+  },
+  {
+    "chunk_id": "chunk_035",
+    "policy_id": "admin-100-02",
+    "section_type": "billing",
+    "text": "Claims for prior authorized services must include the prior authorization number on the CMS-1500 or UB-04 claim form. Failure to include the authorization number may result in claim denial. Electronic claims should include the authorization in the appropriate loop and segment.",
+    "procedure_code": "general"
+  },
+  {
+    "chunk_id": "chunk_036",
+    "policy_id": "admin-100-03",
+    "section_type": "coverage_criteria",
+    "text": "The appeals process for denied prior authorization requests is available to all Medicare beneficiaries. The first level of appeal is a redetermination by the Medicare Administrative Contractor. Subsequent appeal levels include reconsideration by a Qualified Independent Contractor and hearing by an Administrative Law Judge.",
+    "procedure_code": "general"
   }
 ]
