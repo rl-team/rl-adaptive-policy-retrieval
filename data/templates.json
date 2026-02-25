@@ -2,86 +2,260 @@
   "72148": {
     "name": "MRI Lumbar Spine",
     "common_diagnoses": [
-      {"code": "M54.5", "name": "Low back pain", "weight": 0.6},
-      {"code": "M51.26", "name": "Lumbar disc degeneration", "weight": 0.3},
-      {"code": "G89.29", "name": "Other chronic pain", "weight": 0.1}
+      {
+        "code": "M54.5",
+        "name": "Low back pain",
+        "weight": 0.6
+      },
+      {
+        "code": "M51.26",
+        "name": "Lumbar disc degeneration",
+        "weight": 0.3
+      },
+      {
+        "code": "G89.29",
+        "name": "Other chronic pain",
+        "weight": 0.1
+      }
     ],
-    "age_range": [18, 85],
-    "typical_prior_treatments": ["physical_therapy", "NSAIDs", "chiropractic"],
-    "requires_diagnosis_prefix": ["M54", "M51"],
-    "requires_prior_treatments": ["physical_therapy", "chiropractic"],
+    "age_range": [
+      18,
+      85
+    ],
+    "typical_prior_treatments": [
+      "physical_therapy",
+      "NSAIDs",
+      "chiropractic"
+    ],
+    "requires_diagnosis_prefix": [
+      "M54",
+      "M51"
+    ],
+    "requires_prior_treatments": [
+      "physical_therapy",
+      "chiropractic"
+    ],
     "min_coverage_chunks": 2,
     "sources": {
-      "lcd_ids": ["34220"],
-      "ncd_sections": ["220.2"]
+      "lcd_ids": [
+        "34220",
+        "35391",
+        "37279",
+        "37281"
+      ],
+      "article_ids": [
+        "56017",
+        "56018",
+        "56848",
+        "57206",
+        "57207",
+        "58559"
+      ],
+      "ncd_sections": [
+        "220.1",
+        "220.2",
+        "220.6.17",
+        "220.6.19"
+      ]
     }
   },
   "29881": {
     "name": "Knee Arthroscopy",
     "common_diagnoses": [
-      {"code": "M23.21", "name": "Derangement of meniscus", "weight": 0.5},
-      {"code": "M17.11", "name": "Primary osteoarthritis, right knee", "weight": 0.3},
-      {"code": "S83.511A", "name": "Sprain of ACL, right knee", "weight": 0.2}
+      {
+        "code": "M23.21",
+        "name": "Derangement of meniscus",
+        "weight": 0.5
+      },
+      {
+        "code": "M17.11",
+        "name": "Primary osteoarthritis, right knee",
+        "weight": 0.3
+      },
+      {
+        "code": "S83.511A",
+        "name": "Sprain of ACL, right knee",
+        "weight": 0.2
+      }
     ],
-    "age_range": [16, 75],
-    "typical_prior_treatments": ["physical_therapy", "corticosteroid_injection", "bracing"],
-    "requires_diagnosis_prefix": ["M23", "M17", "S83"],
-    "requires_prior_treatments": ["physical_therapy", "corticosteroid_injection"],
+    "age_range": [
+      16,
+      75
+    ],
+    "typical_prior_treatments": [
+      "physical_therapy",
+      "corticosteroid_injection",
+      "bracing"
+    ],
+    "requires_diagnosis_prefix": [
+      "M23",
+      "M17",
+      "S83"
+    ],
+    "requires_prior_treatments": [
+      "physical_therapy",
+      "corticosteroid_injection"
+    ],
     "min_coverage_chunks": 2,
     "sources": {
-      "lcd_ids": ["36575"],
-      "ncd_sections": ["150.9"],
-      "article_ids": ["52369"]
+      "lcd_ids": [
+        "36575"
+      ],
+      "ncd_sections": [
+        "150.9"
+      ],
+      "article_ids": [
+        "52369"
+      ]
     }
   },
   "80053": {
     "name": "Comprehensive Metabolic Panel",
     "common_diagnoses": [
-      {"code": "E11.9", "name": "Type 2 diabetes mellitus", "weight": 0.5},
-      {"code": "E78.5", "name": "Hyperlipidemia", "weight": 0.3},
-      {"code": "Z00.00", "name": "General adult medical exam", "weight": 0.2}
+      {
+        "code": "E11.9",
+        "name": "Type 2 diabetes mellitus",
+        "weight": 0.5
+      },
+      {
+        "code": "E78.5",
+        "name": "Hyperlipidemia",
+        "weight": 0.3
+      },
+      {
+        "code": "Z00.00",
+        "name": "General adult medical exam",
+        "weight": 0.2
+      }
     ],
-    "age_range": [18, 90],
-    "typical_prior_treatments": ["diet_modification", "metformin", "statins"],
-    "requires_diagnosis_prefix": ["E11", "E78", "Z00"],
-    "requires_prior_treatments": ["diet_modification"],
+    "age_range": [
+      18,
+      90
+    ],
+    "typical_prior_treatments": [
+      "diet_modification",
+      "metformin",
+      "statins"
+    ],
+    "requires_diagnosis_prefix": [
+      "E11",
+      "E78",
+      "Z00"
+    ],
+    "requires_prior_treatments": [
+      "diet_modification"
+    ],
     "min_coverage_chunks": 1,
     "sources": {
-      "ncd_sections": ["190.22"]
+      "ncd_sections": [
+        "190.22"
+      ]
     }
   },
   "71260": {
     "name": "CT Chest with Contrast",
     "common_diagnoses": [
-      {"code": "R91.1", "name": "Solitary pulmonary nodule", "weight": 0.4},
-      {"code": "C34.90", "name": "Malignant neoplasm of lung", "weight": 0.3},
-      {"code": "J18.9", "name": "Pneumonia", "weight": 0.3}
+      {
+        "code": "R91.1",
+        "name": "Solitary pulmonary nodule",
+        "weight": 0.4
+      },
+      {
+        "code": "C34.90",
+        "name": "Malignant neoplasm of lung",
+        "weight": 0.3
+      },
+      {
+        "code": "J18.9",
+        "name": "Pneumonia",
+        "weight": 0.3
+      }
     ],
-    "age_range": [30, 85],
-    "typical_prior_treatments": ["chest_xray", "antibiotics", "pulmonary_function_test"],
-    "requires_diagnosis_prefix": ["R91", "C34", "J18"],
-    "requires_prior_treatments": ["chest_xray"],
+    "age_range": [
+      30,
+      85
+    ],
+    "typical_prior_treatments": [
+      "chest_xray",
+      "antibiotics",
+      "pulmonary_function_test"
+    ],
+    "requires_diagnosis_prefix": [
+      "R91",
+      "C34",
+      "J18"
+    ],
+    "requires_prior_treatments": [
+      "chest_xray"
+    ],
     "min_coverage_chunks": 2,
     "sources": {
-      "lcd_ids": ["33459"],
-      "article_ids": ["56580"]
+      "lcd_ids": [
+        "33459",
+        "35391"
+      ],
+      "article_ids": [
+        "56580",
+        "56848",
+        "58559"
+      ],
+      "ncd_sections": [
+        "220.1",
+        "220.6.17",
+        "220.6.19"
+      ]
     }
   },
   "22633": {
     "name": "Lumbar Spinal Fusion",
     "common_diagnoses": [
-      {"code": "M43.16", "name": "Spondylolisthesis, lumbar", "weight": 0.4},
-      {"code": "M48.06", "name": "Spinal stenosis, lumbar", "weight": 0.35},
-      {"code": "M51.16", "name": "Lumbar disc herniation", "weight": 0.25}
+      {
+        "code": "M43.16",
+        "name": "Spondylolisthesis, lumbar",
+        "weight": 0.4
+      },
+      {
+        "code": "M48.06",
+        "name": "Spinal stenosis, lumbar",
+        "weight": 0.35
+      },
+      {
+        "code": "M51.16",
+        "name": "Lumbar disc herniation",
+        "weight": 0.25
+      }
     ],
-    "age_range": [25, 75],
-    "typical_prior_treatments": ["physical_therapy", "epidural_injection", "chiropractic", "NSAIDs", "MRI_imaging", "conservative_management"],
-    "requires_diagnosis_prefix": ["M43", "M48", "M51"],
-    "requires_prior_treatments": ["physical_therapy", "epidural_injection", "MRI_imaging"],
+    "age_range": [
+      25,
+      75
+    ],
+    "typical_prior_treatments": [
+      "physical_therapy",
+      "epidural_injection",
+      "chiropractic",
+      "NSAIDs",
+      "MRI_imaging",
+      "conservative_management"
+    ],
+    "requires_diagnosis_prefix": [
+      "M43",
+      "M48",
+      "M51"
+    ],
+    "requires_prior_treatments": [
+      "physical_therapy",
+      "epidural_injection",
+      "MRI_imaging"
+    ],
     "min_coverage_chunks": 3,
     "sources": {
-      "lcd_ids": ["37848"],
-      "article_ids": ["56396"]
+      "lcd_ids": [
+        "37848"
+      ],
+      "article_ids": [
+        "56396",
+        "56397"
+      ]
     }
   }
 }

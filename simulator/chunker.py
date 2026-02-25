@@ -30,6 +30,13 @@ def chunk_text(text, min_chars=MIN_CHUNK_CHARS, max_words=MAX_CHUNK_WORDS):
             current = part
         else:
             current = candidate
+            
+        # Hard-split fallback if a single part is still too long
+        while len(current.split()) > max_words:
+            words = current.split()
+            chunk_str = " ".join(words[:max_words]).strip()
+            chunks.append(chunk_str.rstrip(".") + ".")
+            current = " ".join(words[max_words:])
 
     if current and len(current) >= min_chars:
         chunks.append(current.strip().rstrip(".") + ".")
