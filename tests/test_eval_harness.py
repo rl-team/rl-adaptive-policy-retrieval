@@ -7,7 +7,7 @@ run with:
 """
 
 from __future__ import annotations
-
+from typing import List
 from evaluation.eval_harness import run_evaluation
 
 
@@ -69,6 +69,50 @@ def _run_tests() -> None:
     assert results2["A"]["mean_chunks"] == 3.0 and results2["B"]["mean_chunks"] == 2.0
     print(f"  Policy A: accuracy={results2['A']['accuracy']}, chunks={results2['A']['mean_chunks']}")
     print(f"  Policy B: accuracy={results2['B']['accuracy']}, chunks={results2['B']['mean_chunks']}")
+    print("  PASSED")
+
+    # --- 3. env_factory seed contract: both policies see same episode sequence ---
+    print("\n[Test 3] env_factory(seed): both policies see same reset() sequence")
+    class DeterministicSeqEnv:
+        """env that returns deterministic request_id on each reset() for same seed"""
+        def __init__(self, seed: int):
+            self._counter = 0
+        def reset(self):
+            info = {"request_id": f"req_{self._counter}"}
+            self._counter += 1
+            return None, info
+        def step(self, action):
+            return None, 0, True, False, {"correct": True, "steps": 0}
+
+    seen_A: List[str] = []
+    seen_B: List[str] = []
+
+    def run_record_A(env):
+        obs, info = env.reset()
+        seen_A.append(info["request_id"])
+        env.step(0)
+        return {"correct": True, "steps": 0}
+
+    def run_record_B(env):
+        obs, info = env.reset()
+        seen_B.append(info["request_id"])
+        env.step(0)
+        return {"correct": True, "steps": 0}
+
+    run_evaluation(
+        [("A", run_record_A), ("B", run_record_B)],
+        num_episodes=3,
+        seed=7,
+        env_factory=lambda s: DeterministicSeqEnv(s),
+        n_bootstrap=10,
+    )
+    assert seen_A == seen_B, (
+        f"Both policies must see same episode sequence; got A={seen_A}, B={seen_B}"
+    )
+    assert seen_A == ["req_0", "req_1", "req_2"], (
+        f"Expected req_0..req_2, got {seen_A}"
+    )
+    print(f"  Both policies saw reset() sequence: {seen_A}")
     print("  PASSED")
 
     print("\n" + "=" * 70)

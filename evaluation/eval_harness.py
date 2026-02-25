@@ -33,13 +33,17 @@ def run_evaluation(
     ----------
     policies : list of (name, run_episode_fn)
         run_episode_fn(env) runs one episode and returns a dict with at least:
-        "correct" (bool), "steps" (int = number of chunks retrieved)
+        "correct" (bool), "steps" (int = number of chunks retrieved).
+        run_episode is responsible for calling env.reset() at the start of
+        each episode (harness does not reset before the episode loop).
     num_episodes : int
         number of episodes per policy
     seed : int
-        random seed for env_factory; ensures same request sequence
+        random seed for env_factory; ensures same request sequence across
+        policies (key correctness property for fair comparison).
     env_factory : callable
-        env_factory(seed) returns a Gym-like env with reset() and step()
+        env_factory(seed) returns a Gym-like env with reset() and step();
+        same seed must yield the same deterministic episode sequence.
     alpha : float
         cost weight for cost-adjusted utility (accuracy - alpha * mean_chunks)
     n_bootstrap : int
