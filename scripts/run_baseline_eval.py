@@ -7,7 +7,7 @@ episode sequence is reproducible and the same for all policies (fair comparison)
 
 Usage:
     python -m scripts.run_baseline_eval
-    python -m scripts.run_baseline_eval --episodes 50 --seed 999
+    python -m scripts.run_baseline_eval --episodes 50 --seed 42
     python -m scripts.run_baseline_eval --checkpoint path/to/checkpoint.pt --output data/eval_results.json
 """
 from __future__ import annotations
@@ -69,7 +69,7 @@ def _results_to_json_serializable(results: Dict[str, Dict[str, Any]]) -> Dict[st
     """Convert results dict so CI tuples become lists for JSON."""
     out: Dict[str, Any] = {}
     for name, m in results.items():
-        out[name] = {
+        row: Dict[str, Any] = {
             "accuracy": m["accuracy"],
             "accuracy_ci": list(m["accuracy_ci"]),
             "mean_chunks": m["mean_chunks"],
@@ -78,6 +78,10 @@ def _results_to_json_serializable(results: Dict[str, Dict[str, Any]]) -> Dict[st
             "cost_adjusted_utility_ci": list(m["cost_adjusted_utility_ci"]),
             "n_episodes": m["n_episodes"],
         }
+        if "mean_return" in m and "mean_return_ci" in m:
+            row["mean_return"] = m["mean_return"]
+            row["mean_return_ci"] = list(m["mean_return_ci"])
+        out[name] = row
     return out
 
 
@@ -89,7 +93,7 @@ def main() -> None:
         description="Evaluate baselines (and optional CQL) on test set; write results to JSON.",
     )
     parser.add_argument("--episodes", type=int, default=50, help="test set size (episodes per policy)")
-    parser.add_argument("--seed", type=int, default=999, help="random seed for test set (reproducible sequence)")
+    parser.add_argument("--seed", type=int, default=42, help="random seed for test set (reproducible sequence, match milestone report)")
     parser.add_argument("--alpha", type=float, default=0.1, help="cost weight for cost-adjusted utility")
     parser.add_argument("--output", type=str, default="data/eval_results.json", help="write results to this JSON file")
     parser.add_argument("--checkpoint", type=str, default=None, help="if set, evaluate this CQL checkpoint and include in results")
@@ -110,14 +114,14 @@ def main() -> None:
     print("=" * 76)
     print(f"  Episodes: {args.episodes}  Seed: {args.seed}  Alpha: {args.alpha}")
     print("-" * 76)
-    print(f"  {'Policy':<24} {'Accuracy':>26} {'Mean Chunks':>26} {'Cost-Adj Utility':>26}")
+    print(f"  {'Policy':<24} {'Accuracy':>26} {'Steps':>26} {'Return':>26}")
     print("-" * 76)
 
     for name, m in results.items():
         acc_str = _format_ci(m["accuracy"], m["accuracy_ci"], pct=True)
-        ch_str = _format_ci(m["mean_chunks"], m["mean_chunks_ci"], pct=False)
-        cau_str = _format_ci(m["cost_adjusted_utility"], m["cost_adjusted_utility_ci"], pct=False)
-        print(f"  {name:<24} {acc_str:>26} {ch_str:>26} {cau_str:>26}")
+        steps_str = _format_ci(m["mean_chunks"], m["mean_chunks_ci"], pct=False)
+        ret_str = _format_ci(m["mean_return"], m["mean_return_ci"], pct=False) if "mean_return" in m else "N/A"
+        print(f"  {name:<24} {acc_str:>26} {steps_str:>26} {ret_str:>26}")
 
     print("=" * 76)
 

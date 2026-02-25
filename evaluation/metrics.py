@@ -146,12 +146,14 @@ def compute_metrics(
     n_bootstrap: int = 1000,
     retrieved_per_episode: Optional[List[List[int]]] = None,
     relevant_per_episode: Optional[List[List[int]]] = None,
+    returns_per_episode: Optional[List[float]] = None,
 ) -> Dict[str, float | Tuple[float, float]]:
     """compute all metrics with bootstrap 95% CIs
 
     returns a dict with:
     - accuracy, accuracy_ci
-    - mean_chunks, mean_chunks_ci
+    - mean_chunks, mean_chunks_ci (Steps)
+    - mean_return, mean_return_ci (if returns_per_episode provided)
     - cost_adjusted_utility, cost_adjusted_utility_ci
     - n_episodes
     - precision_at_k, precision_at_k_ci (only if relevance data provided)
@@ -180,6 +182,13 @@ def compute_metrics(
         "cost_adjusted_utility_ci": cau_ci,
         "n_episodes": n,
     }
+
+    if returns_per_episode is not None and len(returns_per_episode) == n:
+        returns_arr = np.array(returns_per_episode, dtype=float)
+        mean_ret = float(np.mean(returns_arr))
+        mean_ret_ci = bootstrap_ci(returns_arr, "mean", n_bootstrap)
+        out["mean_return"] = mean_ret
+        out["mean_return_ci"] = mean_ret_ci
 
     if retrieved_per_episode is not None and relevant_per_episode is not None:
         prec = precision_at_k(retrieved_per_episode, relevant_per_episode)

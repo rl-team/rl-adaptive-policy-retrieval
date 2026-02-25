@@ -3,13 +3,14 @@ evaluation harness: orchestrates the evaluation pipeline per EDD
 
 workflow:
 1. load test set (same seed => same episode sequence for all policies)
-2. for each policy: reset env, run episodes, record correct + chunks per episode
-3. compute metrics (accuracy, mean chunks, cost-adjusted utility) with bootstrap CIs
+2. for each policy: reset env, run episodes, record correct + chunks + return per episode
+3. compute metrics (accuracy, steps/mean_chunks, return) with bootstrap CIs
 4. return results per policy (visualizations are separate)
 """
 
 from __future__ import annotations
 from typing import Any, Callable, Dict, List, Tuple
+
 from evaluation.metrics import compute_metrics
 
 # ---------------------------------------------------------------------------
@@ -60,17 +61,21 @@ def run_evaluation(
         env = env_factory(seed)
         correct: List[bool] = []
         chunks_per_episode: List[int] = []
+        returns_per_episode: List[float] = []
 
         for _ in range(num_episodes):
             outcome = run_episode(env)
             correct.append(outcome["correct"])
             chunks_per_episode.append(outcome["steps"])
+            if "return" in outcome:
+                returns_per_episode.append(float(outcome["return"]))
 
         results[name] = compute_metrics(
             correct,
             chunks_per_episode,
             alpha=alpha,
             n_bootstrap=n_bootstrap,
+            returns_per_episode=returns_per_episode if returns_per_episode else None,
         )
 
     return results
