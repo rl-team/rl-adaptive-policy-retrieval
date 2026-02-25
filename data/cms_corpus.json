@@ -110,5 +110,89 @@
     "section_type": "billing",
     "text": "Refer to CMS Publication 100-04, Medicare Claims Processing Manual , Chapter 30, revised 09/05/2008, for complete instructions. Specific coding information for this policy The physician/provider performing the procedure is responsible for identifying those patients for whom Medicare does not consider the procedure reasonable or necessary. Report CPT code 29999 (Unlisted procedure, arthroscopy) for arthroscopic lavage of the knee for treatment of osteoarthritis and/or arthroscopic debridement and lavage for patients with severe osteoarthritis. Report CPT code 29877 (Arthroscopy, knee, surgical; debridement/shaving of articular cartilage [chrondroplasty]) for arthroscopic debridement with presentation of knee pain only, or arthroscopic debridement without lavage for patients with severe osteoarthritis. Report HCPCS code G0289 for arthroscopy, knee, surgical, for removal of loose body, foreign body, debridement/shaving of articular cartilage (chondroplasty) at the time of other surgical knee arthroscopy in a different compartment of the same knee. For claims submitted to the Part B MAC: All services/procedures performed on the same day for the same beneficiary by the physician/provider should be billed on the same claim.",
     "procedure_code": "29881"
+  },
+  {
+    "chunk_id": "chunk_016",
+    "policy_id": "NCD_190.22",
+    "section_type": "coverage_criteria",
+    "text": "Thyroid function studies are used to delineate the presence or absence of hormonal abnormalities of the thyroid and pituitary glands. These abnormalities may be either primary or secondary and often but not always accompany clinically defined signs and symptoms indicative of thyroid dysfunction. Laboratory evaluation of thyroid function has become more scientifically defined. Tests can be done with increased specificity, thereby reducing the number of tests needed to diagnose and follow treatment of most thyroid disease. Measurements of serum sensitive thyroid-stimulating hormone (TSH) levels, complemented by determination of thyroid hormone levels [free thyroxine (fT-4) or total thyroxine (T4) with Triiodothyronine (T3) uptake] are used for diagnosis and follow-up of patients with thyroid disorders. Additional tests may be necessary to evaluate certain complex diagnostic problems or on hospitalized patients, where many circumstances can skew tests results. When a test for total thyroxine (total T4 or T4 radioimmunoassay) or T3 uptake is performed, calculation of the free thyroxine index (FTI) is useful to correct for abnormal results for either total T4 or T3 uptake due to protein binding effects.",
+    "procedure_code": "80053"
+  },
+  {
+    "chunk_id": "chunk_017",
+    "policy_id": "NCD_190.22",
+    "section_type": "coverage_criteria",
+    "text": "Indications Thyroid function tests are used to define hyper function, euthyroidism, or hypofunction of thyroid disease. Thyroid testing may be reasonable and necessary to: Distinguish between primary and secondary hypothyroidism; Confirm or rule out primary hypothyroidism; Monitor thyroid hormone levels (for example, patients with goiter, thyroid nodules, or thyroid cancer); Monitor drug therapy in patients with primary hypothyroidism; Confirm or rule out primary hyperthyroidism; and Monitor therapy in patients with hyperthyroidism. Thyroid function testing may be medically necessary in patients with disease or neoplasm of the thyroid and other endocrine glands. Thyroid function testing may also be medically necessary in patients with metabolic disorders; malnutrition; hyperlipidemia; certain types of anemia; psychosis and non-psychotic personality disorders; unexplained depression; ophthalmologic disorders; various cardiac arrhythmias; disorders of menstruation; skin conditions; myalgias; and a wide array of signs and symptoms, including alterations in consciousness; malaise; hypothermia; symptoms of the nervous and musculoskeletal system; skin and integumentary system; nutrition and metabolism; cardiovascular; and gastrointestinal system. It may be medically necessary to do follow-up thyroid testing in patients with a personal history of malignant neoplasm of the endocrine system and in patients on long-term thyroid drug therapy. Limitations Testing may be covered up to two times a year in clinically stable patients; more frequent testing may be reasonable and necessary for patients whose thyroid therapy has been altered or in whom symptoms or signs of hyperthyroidism or hypothyroidism are noted. Note: Scroll down for links to the quarterly Covered Code Lists (including narrative).",
+    "procedure_code": "80053"
+  },
+  {
+    "chunk_id": "chunk_018",
+    "policy_id": "LCD_33459",
+    "section_type": "coverage_criteria",
+    "text": "The following clinical indications apply to the computerized axial tomography (CT or CAT) of the thorax: Evaluation of pulmonary, mediastinal, pleural and chest wall infections and their complications Detection and characterization of mediastinal neoplasms and other processes Assessment of cardiopulmonary failure or insufficiency Diagnosis and/or staging of neoplastic and hematologic processes arising in the thorax or with potential involvement of the thorax Detection and determination of nature and extent of cardiovascular abnormalities such as, but not limited to, aneurysm, dissection, embolism, thrombosis, congenital anomalies, postoperative complications and sequelae of atherosclerotic disease For assessing and/or guiding drainage of pulmonary or pleural fluid collections such as abscess, empyema, effusion or pneumothorax For characterizing and follow-up evaluation of interstitial and alveolar lung disease due to idiopathic, allergic, collagen-vascular, environmental or other causes For evaluating thoracic sequelae of remote processes including, but not limited to, pancreatitis, gastrointestinal perforation and other processes For assessing injury, potential injury or thoracic sequelae after trauma, burn, surgery, transplantation, radiation therapy, chemotherapy or invasive procedure such as pacemaker placement, chest tube placement or mechanical ventilation Evaluation of the patient with symptoms that may be arising from the chest, or be referred to the chest including, but not limited to, cough, hemoptysis, chest pain, abdominal pain and others To further characterize a suspected abnormality detected by another imaging test Evaluation of a patient with myasthenia gravis to rule out thymic tumors Performance of CT-guided biopsies and drainage procedures when fluoroscopy is inadequate The most common symptom of an aortic dissection (occurring in approximately 90% of the cases) is sudden, excruciating pain most commonly located in the anterior chest. Patients may describe the pain as \"cutting,\" \"ripping,\" or \"tearing\". A sudden neurologic episode usually accompanies the onset of most instances of \"painless\" aortic dissection. NOTE: Radiologic examinations of the chest represent the basic diagnostic tests used to identify abnormalities of the thorax. The chest x-ray and/or physical examination should be used to evaluate patients who present with signs and/or symptoms suggestive of chest pathology prior to proceeding to a CT scan. In addition to the medical necessity requirements, the CT scan must be performed on a model of CT equipment that is recognized by the United States Food and Drug Administration (FDA) and has achieved the full market phase of development. In keeping with American College of Radiology (ACR) Practice Guidelines and Technical Standards, CT thorax should be provided by qualified radiology personnel (radiology technicians, diagnostic radiologists). The patient s condition should be monitored throughout the procedure. As this involves the patient being in a closed environment, claustrophobia or medical problems exacerbated by the enclosure may be exhibited. Qualified physicians (such as board-certified radiologists) should perform the interpretation of the films. The CT service should be furnished only when clinically appropriate for the patient s symptoms or complaint. When performed as a screening function, it will not be covered.",
+    "procedure_code": "71260"
+  },
+  {
+    "chunk_id": "chunk_019",
+    "policy_id": "Article_56580",
+    "section_type": "billing",
+    "text": "The information in this article contains billing, coding or other guidelines that complement the Local Coverage Determination (LCD) for Computerized Axial Tomography (CT), Thorax L33459. Reordering Identical Type of Imaging Examination: No imaging examination (pertaining to an identical CPT code only) should be ordered more frequently than 6 times per calendar year. Furthermore, this frequency limit shall only apply to the following outpatient Places of Service (POS): office (11), outpatient hospital (22), independent clinic (49), rural health clinic (72) and independent diagnostic testing facility (IDTF).",
+    "procedure_code": "71260"
+  },
+  {
+    "chunk_id": "chunk_020",
+    "policy_id": "LCD_37848",
+    "section_type": "coverage_criteria",
+    "text": "Definitions and Scope This local coverage determination (LCD) discusses fusions of the lumbar spine. Background This LCD will discuss indications for surgical fusion of the lumbar spine. Total disc arthroplasty.",
+    "procedure_code": "22633"
+  },
+  {
+    "chunk_id": "chunk_021",
+    "policy_id": "LCD_37848",
+    "section_type": "exclusions",
+    "text": "is not covered by this LCD. Requirements Lumbar fusion must be performed by a qualified surgeon in an operating room with the necessary equipment. For elective surgeries, providers should verify that the necessary equipment and hardware to perform the procedure on a patient is available prior to the induction of anesthesia. Documentation must demonstrate that the patient met at least 1 of the indications for the procedure as described below. Where possible, there must be documented shared decision making with the patient or the individual who is serving as the proxy decision maker for the patient with the appropriate discussion of anticipated risks and benefits of the procedure. Indications for lumbar fusion include any of the following. A patient must have at least 1 of the following: 1. Radiographic or clinical evidence of instability due to any 1 of the following: a. Congenital deformities, b. Trauma, c. Fractures, d. Chronic degenerative conditions, e. Tumor, f. Infection, g. Erosive conditions, h. Space-occupying lesions, or i. Iatrogenic causes, including expected instability as a consequence of another medically necessary spine procedure. If more than 1 level is fused under this indication, the record must reflect that each fused level is affected by 1 of the above conditions. 2. Symptomatic spinal deformity (in the absence of instability or neural compression) which meets the following criteria: Both of the first 2 criteria must be met: a. Functional limitation in daily activities due to back pain or discomfort and b. Nonresponse to at least 1 year of non-operative treatment Any 1 of these 3 criteria must be met: c. Sagittal or coronal imbalance by at least 5 cm as measured on radiographic imaging of the entire spine, or d. Progression of deformity by at least 10 degrees, or e. Scoliotic curvature of greater than 30 degrees 3. Revision surgery for pseudarthrosis following an initial spine surgery if the following conditions are all met. a. The patient had a period of reduced pain initially following surgery and b. The time since the prior surgery has been at least 1 year and c. There is clear radiographic evidence of pseudarthrosis and d. The patient has exhausted available conservative treatment measures The medical record must clearly reflect which conservative treatments the patient has tried or is not a candidate for and why, including medical therapies, physical and exercise therapies and injections. Outcomes for fusion in revision surgery, usually do not lead to pain relief and as such fusion is considered a last resort treatment option only when all other treatment options have failed. This information must be communicated to the patient prior to surgery to allow for appropriate shared decision making with a well-informed patient. The medical record must reflect that this counseling was done and that the patient wished to undergo surgery with the appropriately informed consent. 4. Symptomatic compression of neural elements for which disc excision is necessary for decompression. The record must reflect disc compression of neural elements for each level fused based on this indication.",
+    "procedure_code": "22633"
+  },
+  {
+    "chunk_id": "chunk_022",
+    "policy_id": "Article_56396",
+    "section_type": "billing",
+    "text": "The information in this article contains billing, coding or other guidelines that complement the Local Coverage Determination (LCD) for Lumbar Spinal Fusion L37848.",
+    "procedure_code": "22633"
+  },
+  {
+    "chunk_id": "chunk_023",
+    "policy_id": "admin-100-01",
+    "section_type": "coverage_criteria",
+    "text": "Medicare Part B covers medically necessary services and preventive services. Medically necessary services are defined as services or supplies needed to diagnose or treat a medical condition and that meet accepted standards of medical practice.",
+    "procedure_code": "general"
+  },
+  {
+    "chunk_id": "chunk_024",
+    "policy_id": "admin-100-01",
+    "section_type": "coverage_criteria",
+    "text": "Prior authorization is required for certain Medicare Part B services as specified by CMS. The prior authorization process ensures that services meet Medicare coverage requirements before they are provided. Providers must submit clinical documentation supporting medical necessity.",
+    "procedure_code": "general"
+  },
+  {
+    "chunk_id": "chunk_025",
+    "policy_id": "admin-100-02",
+    "section_type": "coverage_criteria",
+    "text": "Evidence-based clinical guidelines should be used to support prior authorization decisions. The American Medical Association and specialty societies publish guidelines that inform coverage determinations. Payers should reference the most current published guidelines.",
+    "procedure_code": "general"
+  },
+  {
+    "chunk_id": "chunk_026",
+    "policy_id": "admin-100-02",
+    "section_type": "billing",
+    "text": "Claims for prior authorized services must include the prior authorization number on the CMS-1500 or UB-04 claim form. Failure to include the authorization number may result in claim denial. Electronic claims should include the authorization in the appropriate loop and segment.",
+    "procedure_code": "general"
+  },
+  {
+    "chunk_id": "chunk_027",
+    "policy_id": "admin-100-03",
+    "section_type": "coverage_criteria",
+    "text": "The appeals process for denied prior authorization requests is available to all Medicare beneficiaries. The first level of appeal is a redetermination by the Medicare Administrative Contractor. Subsequent appeal levels include reconsideration by a Qualified Independent Contractor and hearing by an Administrative Law Judge.",
+    "procedure_code": "general"
   }
 ]

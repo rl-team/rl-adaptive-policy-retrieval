@@ -22,18 +22,12 @@ SECTION_MAP = {
 }
 
 # Sources to parse for each target procedure
-# Hard-code to two procedures for the MVP
-LCD_SOURCES = {
-    "72148": {
-        "lcd_ids": ["34220"],
-        "ncd_sections": ["220.2"],
-    },
-    "29881": {
-        "lcd_ids": ["36575"],
-        "ncd_sections": ["150.9"],
-        "article_ids": ["52369"],
-    },
-}
+def _get_lcd_sources():
+    with open(os.path.join(RAW_DIR, "..", "templates.json"), "r") as f:
+        templates = json.load(f)
+    return {proc: t.get("sources", {}) for proc, t in templates.items()}
+
+LCD_SOURCES = _get_lcd_sources()
 
 
 def strip_html(text):
@@ -136,7 +130,7 @@ def _split_exclusions(sections):
 def parse_cms_data():
     """Parse all relevant CMS sources for target procedures.
 
-    Returns dict mapping procedure_code -> list of {source, section_type, text}.
+    Returns dict mapping procedure_code -> list of {source, section_type, text, procedure_code}.
     """
     parsed = {}
     for proc_code, sources in LCD_SOURCES.items():
@@ -146,7 +140,44 @@ def parse_cms_data():
         if "article_ids" in sources:
             sections.extend(_read_articles(sources["article_ids"]))
         sections = _split_exclusions(sections)
+        for s in sections:
+            s["procedure_code"] = proc_code
         parsed[proc_code] = sections
+        
+    # Add some generic/distractor chunks
+    general_sections = []
+    general_sections.append({
+        "source": "admin-100-01",
+        "section_type": "coverage_criteria",
+        "text": "Medicare Part B covers medically necessary services and preventive services. Medically necessary services are defined as services or supplies needed to diagnose or treat a medical condition and that meet accepted standards of medical practice.",
+        "procedure_code": "general"
+    })
+    general_sections.append({
+        "source": "admin-100-01",
+        "section_type": "coverage_criteria",
+        "text": "Prior authorization is required for certain Medicare Part B services as specified by CMS. The prior authorization process ensures that services meet Medicare coverage requirements before they are provided. Providers must submit clinical documentation supporting medical necessity.",
+        "procedure_code": "general"
+    })
+    general_sections.append({
+        "source": "admin-100-02",
+        "section_type": "coverage_criteria",
+        "text": "Evidence-based clinical guidelines should be used to support prior authorization decisions. The American Medical Association and specialty societies publish guidelines that inform coverage determinations. Payers should reference the most current published guidelines.",
+        "procedure_code": "general"
+    })
+    general_sections.append({
+        "source": "admin-100-02",
+        "section_type": "billing",
+        "text": "Claims for prior authorized services must include the prior authorization number on the CMS-1500 or UB-04 claim form. Failure to include the authorization number may result in claim denial. Electronic claims should include the authorization in the appropriate loop and segment.",
+        "procedure_code": "general"
+    })
+    general_sections.append({
+        "source": "admin-100-03",
+        "section_type": "coverage_criteria",
+        "text": "The appeals process for denied prior authorization requests is available to all Medicare beneficiaries. The first level of appeal is a redetermination by the Medicare Administrative Contractor. Subsequent appeal levels include reconsideration by a Qualified Independent Contractor and hearing by an Administrative Law Judge.",
+        "procedure_code": "general"
+    })
+    parsed["general"] = general_sections
+    
     return parsed
 
 

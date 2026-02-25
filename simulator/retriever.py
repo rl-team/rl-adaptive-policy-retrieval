@@ -40,8 +40,8 @@ class SentenceTransformerRetriever:
                 text=c["text"],
                 embedding=self._embeddings[i],
                 section_type=c["section_type"],
+                procedure_code=c.get("procedure_code", ""),
                 metadata={
-                    "procedure_code": c.get("procedure_code", ""),
                     "index": i,
                 },
             ))
