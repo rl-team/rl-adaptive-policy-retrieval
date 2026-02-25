@@ -146,10 +146,10 @@ def plot(all_data: dict) -> None:
     """Create 4-panel training curves figure."""
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    fig, axes = plt.subplots(2, 2, figsize=(10, 7))
+    fig, axes = plt.subplots(2, 2, figsize=(10, 7.2))
     fig.suptitle(
-        "Conservative Q-Learning Training Curves (Hyperparameter Sweep)",
-        fontsize=13, fontweight="bold", y=0.98,
+        "Conservative Q-Learning training curves (hyperparameter sweep)",
+        fontsize=12, fontweight="bold", y=0.98,
     )
 
     flat_axes = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
@@ -165,18 +165,23 @@ def plot(all_data: dict) -> None:
                 linewidth=2.0, label=label,
             )
         ax.set_title(title, fontsize=11)
-        ax.set_xlabel("Epoch", fontsize=9)
+        ax.set_xlabel("Training epoch", fontsize=10)
         ax.grid(True, alpha=0.3)
-        ax.tick_params(labelsize=8)
+        ax.tick_params(labelsize=9)
 
     # Shared legend
-    handles, labels = flat_axes[0].get_legend_handles_labels()
+    handles, labels_leg = flat_axes[0].get_legend_handles_labels()
     fig.legend(
-        handles, labels, loc="lower center", ncol=3, fontsize=10,
-        frameon=True, bbox_to_anchor=(0.5, -0.02),
+        handles, labels_leg, loc="lower center", ncol=3, fontsize=9,
+        frameon=True, bbox_to_anchor=(0.5, 0.02),
+    )
+    fig.text(
+        0.5, 0.005,
+        "Figure 2. Conservative Q-Learning training curves (hyperparameter sweep). Solid lines: exponential moving average (α=0.9). Best config (α=0.5, lr=1e-3) balances accuracy and efficiency.",
+        ha="center", fontsize=8, style="italic",
     )
 
-    plt.tight_layout(rect=[0, 0.04, 1, 0.96])
+    plt.tight_layout(rect=[0, 0.06, 1, 0.95])
 
     png_path = os.path.join(OUTPUT_DIR, "training_curves.png")
     pdf_path = os.path.join(OUTPUT_DIR, "training_curves.pdf")
