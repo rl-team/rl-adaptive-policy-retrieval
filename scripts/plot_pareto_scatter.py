@@ -1,111 +1,145 @@
 """
-Partial Pareto plot: Accuracy vs mean chunks (publication-quality).
+Load evaluation results and output Pareto (accuracy vs chunks) as LaTeX tabular;
+optionally render scatter plot as PNG/PDF.
 
-Shows the accuracy–efficiency tradeoff for baselines and Conservative QL.
-Data from run_baseline_eval (50 episodes, seed 999) and milestone CQL eval.
-
-Usage:
-    python -m scripts.plot_pareto_scatter
-    python -m scripts.plot_pareto_scatter --output figures/pareto_scatter.png
+Data source: data/eval_results.json from scripts.run_baseline_eval.
+Usage: python -m scripts.plot_pareto_scatter
 """
-
 from __future__ import annotations
 
-import argparse
+import json
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 
 from scripts.plot_style import apply_publication_style, PUBLICATION_DPI
 
+INPUT_JSON = "data/eval_results.json"
+LATEX_OUT = "figures/pareto_table.tex"
+OUTPUT_PNG_PDF = True
+FIGURE_PATH = "figures/pareto_scatter.png"
 
-# Three points: (mean_chunks, accuracy_pct)
-# FixedK(k=3): 100% accuracy, 4.00 chunks
-# Heuristic(0.8): 98% accuracy, 3.64 chunks
-# Conservative QL (α=0.5): 100% accuracy, 4.10 chunks (milestone eval)
-CHUNKS = [4.00, 3.64, 4.10]
-ACCURACY_PCT = [100.0, 98.0, 100.0]
-LABELS = ["FixedK(k=3)", "Heuristic(0.8)", "Conservative QL (α=0.5)"]
-COLORS = ["#2e86ab", "#e94f37", "#2ecc71"]  # blue, red, green
-# Per-point (dx, dy) in points; ha: horizontal alignment. FixedK left, CQL right to avoid overlap.
-ANNOT_OFFSETS = [(-10, 6), (8, 6), (8, 6)]   # FixedK, Heuristic, Conservative QL
-ANNOT_HA = ["right", "left", "left"]
+POLICY_ORDER = [
+    "FixedK(k=3)",
+    "FixedK(k=5)",
+    "Heuristic(0.8)",
+    "Conservative QL (α=0.5)",
+]
+COLORS = ["#2e86ab", "#9b59b6", "#e94f37", "#2ecc71"]
+ANNOT_OFFSETS = [(-10, 6), (-10, 6), (8, 6), (8, 6)]
+ANNOT_HA = ["right", "right", "left", "left"]
+
+
+def load_results(path: Path) -> Tuple[Dict[str, Any], Dict[str, Dict[str, Any]]]:
+    with open(path) as f:
+        data = json.load(f)
+    return data.get("meta", {}), data.get("results", {})
+
+
+def results_to_series(
+    results: Dict[str, Dict[str, Any]],
+) -> Tuple[List[str], List[float], List[float]]:
+    """Return (policy_names, mean_chunks, accuracy_pct) in POLICY_ORDER."""
+    names, chunks, accs = [], [], []
+    for name in POLICY_ORDER:
+        if name not in results:
+            continue
+        m = results[name]
+        names.append(name)
+        chunks.append(m["mean_chunks"])
+        accs.append(m["accuracy"] * 100.0)
+    return names, chunks, accs
+
+
+def emit_latex_tabular(
+    names: List[str],
+    chunks: List[float],
+    accs: List[float],
+    meta: Dict[str, Any],
+    out_path: Optional[Path],
+) -> str:
+    """Emit LaTeX tabular: Policy | Average chunks retrieved | Decision accuracy (%)."""
+    lines = [
+        r"\begin{tabular}{lcc}",
+        r"  \toprule",
+        r"  Policy & Average chunks retrieved & Decision accuracy (\%) \\",
+        r"  \midrule",
+    ]
+    for i, name in enumerate(names):
+        policy_tex = name.replace("α=0.5", r"$\alpha=0.5$")
+        lines.append(f"  {policy_tex} & {chunks[i]:.2f} & {accs[i]:.1f}\\% \\\\")
+    lines.append(r"  \bottomrule")
+    lines.append(r"\end{tabular}")
+    table = "\n".join(lines)
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w") as f:
+            f.write(table)
+    return table
+
+
+def render_figure(
+    names: List[str],
+    chunks: List[float],
+    accs: List[float],
+    out_path: Path,
+    dpi: int,
+) -> None:
+    fig, ax = plt.subplots(figsize=(5.5, 4.2))
+    apply_publication_style(dpi=dpi)
+    n = len(names)
+    colors = COLORS[:n]
+    offsets = ANNOT_OFFSETS[:n]
+    has = ANNOT_HA[:n]
+    ax.scatter(
+        chunks, accs,
+        s=140, zorder=3, color=colors, edgecolors="white", linewidths=0.8,
+    )
+    for i, label in enumerate(names):
+        ax.annotate(
+            label,
+            (chunks[i], accs[i]),
+            xytext=offsets[i],
+            textcoords="offset points",
+            fontsize=9,
+            ha=has[i],
+        )
+    order = sorted(range(n), key=lambda i: chunks[i])
+    x_line = [chunks[i] for i in order]
+    y_line = [accs[i] for i in order]
+    ax.step(x_line, y_line, where="post", color="gray", linestyle="--", alpha=0.7, zorder=1)
+    ax.set_xlabel("Average chunks retrieved", fontsize=10)
+    ax.set_ylabel("Decision accuracy (%)", fontsize=10)
+    ax.set_xlim(min(chunks) - 0.3, max(chunks) + 0.3)
+    ax.set_ylim(min(accs) - 2, 101)
+    ax.grid(True, alpha=0.3)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=dpi, bbox_inches="tight", pad_inches=0.3)
+    plt.savefig(out_path.with_suffix(".pdf"), bbox_inches="tight", pad_inches=0.3)
+    plt.close()
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Plot Accuracy vs Mean Chunks scatter (partial Pareto)."
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        default="figures/pareto_scatter.png",
-        help="Output path (PNG). PDF saved with .pdf extension.",
-    )
-    parser.add_argument("--dpi", type=int, default=PUBLICATION_DPI, help="DPI for PNG.")
-    args = parser.parse_args()
+    path = Path(INPUT_JSON)
+    if not path.exists():
+        raise SystemExit(f"Input not found: {path}. Run: python -m scripts.run_baseline_eval [--checkpoint ...] --output {path}")
 
-    apply_publication_style(dpi=args.dpi)
-    out_path = Path(args.output)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
+    meta, results = load_results(path)
+    names, chunks, accs = results_to_series(results)
+    if not names:
+        raise SystemExit("No policy results found in JSON.")
 
-    fig, ax = plt.subplots(figsize=(5.5, 4.2))
-    ax.scatter(CHUNKS, ACCURACY_PCT, s=140, zorder=3, color=COLORS, edgecolors="white", linewidths=0.8)
-    for i, label in enumerate(LABELS):
-        ax.annotate(
-            label,
-            (CHUNKS[i], ACCURACY_PCT[i]),
-            xytext=ANNOT_OFFSETS[i],
-            textcoords="offset points",
-            fontsize=9,
-            ha=ANNOT_HA[i],
-        )
-    ax.set_xlabel("Mean number of chunks retrieved", fontsize=10)
-    ax.set_ylabel("Accuracy (%)", fontsize=10)
-    ax.set_title("Accuracy–efficiency tradeoff (partial Pareto)", fontsize=11, fontweight="bold")
-    ax.set_xlim(3.4, 4.4)
-    ax.set_ylim(96.5, 101)
-    ax.grid(True, alpha=0.3)
-    ax.set_axisbelow(True)
-    fig.text(
-        0.5, 0.02,
-        "Figure 1. Accuracy–efficiency tradeoff (partial Pareto). Higher accuracy and fewer chunks are better; Pareto frontier is top-left. Test set: 50 episodes, seed 999.",
-        ha="center", fontsize=8, style="italic",
-    )
-    plt.tight_layout(rect=[0, 0.08, 1, 1])
-    plt.savefig(out_path, dpi=args.dpi, bbox_inches="tight", pad_inches=0.3)
-    plt.close()
+    out = Path(LATEX_OUT)
+    emit_latex_tabular(names, chunks, accs, meta, out)
+    print(f"LaTeX written to {out}")
 
-    pdf_path = out_path.with_suffix(".pdf")
-    fig2, ax2 = plt.subplots(figsize=(5.5, 4.2))
-    ax2.scatter(CHUNKS, ACCURACY_PCT, s=140, zorder=3, color=COLORS, edgecolors="white", linewidths=0.8)
-    for i, label in enumerate(LABELS):
-        ax2.annotate(
-            label,
-            (CHUNKS[i], ACCURACY_PCT[i]),
-            xytext=ANNOT_OFFSETS[i],
-            textcoords="offset points",
-            fontsize=9,
-            ha=ANNOT_HA[i],
-        )
-    ax2.set_xlabel("Mean number of chunks retrieved", fontsize=10)
-    ax2.set_ylabel("Accuracy (%)", fontsize=10)
-    ax2.set_title("Accuracy–efficiency tradeoff (partial Pareto)", fontsize=11, fontweight="bold")
-    ax2.set_xlim(3.4, 4.4)
-    ax2.set_ylim(96.5, 101)
-    ax2.grid(True, alpha=0.3)
-    ax2.set_axisbelow(True)
-    fig2.text(
-        0.5, 0.02,
-        "Figure 1. Accuracy–efficiency tradeoff (partial Pareto). Higher accuracy and fewer chunks are better; Pareto frontier is top-left. Test set: 50 episodes, seed 999.",
-        ha="center", fontsize=8, style="italic",
-    )
-    plt.tight_layout(rect=[0, 0.08, 1, 1])
-    plt.savefig(pdf_path, bbox_inches="tight", pad_inches=0.3)
-    plt.close()
-
-    print(f"Saved: {out_path}")
-    print(f"Saved: {pdf_path}")
+    if OUTPUT_PNG_PDF:
+        out_path = Path(FIGURE_PATH)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        render_figure(names, chunks, accs, out_path, PUBLICATION_DPI)
+        print(f"Figure saved: {out_path} and {out_path.with_suffix('.pdf')}")
 
 
 if __name__ == "__main__":

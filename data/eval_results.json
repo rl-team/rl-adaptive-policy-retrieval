@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "episodes": 50,
+    "seed": 999,
+    "alpha": 0.1
+  },
+  "results": {
+    "FixedK(k=3)": {
+      "accuracy": 1.0,
+      "accuracy_ci": [1.0, 1.0],
+      "mean_chunks": 4.0,
+      "mean_chunks_ci": [4.0, 4.0],
+      "cost_adjusted_utility": 0.6,
+      "cost_adjusted_utility_ci": [0.6, 0.6],
+      "n_episodes": 50
+    },
+    "FixedK(k=5)": {
+      "accuracy": 1.0,
+      "accuracy_ci": [1.0, 1.0],
+      "mean_chunks": 6.0,
+      "mean_chunks_ci": [6.0, 6.0],
+      "cost_adjusted_utility": 0.4,
+      "cost_adjusted_utility_ci": [0.4, 0.4],
+      "n_episodes": 50
+    },
+    "Heuristic(0.8)": {
+      "accuracy": 0.98,
+      "accuracy_ci": [0.92, 1.0],
+      "mean_chunks": 3.64,
+      "mean_chunks_ci": [3.5, 3.78],
+      "cost_adjusted_utility": 0.62,
+      "cost_adjusted_utility_ci": [0.57, 0.65],
+      "n_episodes": 50
+    },
+    "Conservative QL (α=0.5)": {
+      "accuracy": 1.0,
+      "accuracy_ci": [1.0, 1.0],
+      "mean_chunks": 4.1,
+      "mean_chunks_ci": [4.1, 4.1],
+      "cost_adjusted_utility": 0.59,
+      "cost_adjusted_utility_ci": [0.59, 0.59],
+      "n_episodes": 50
+    }
+  }
+}

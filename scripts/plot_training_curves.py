@@ -1,5 +1,5 @@
 """
-Generate publication-quality training curves from sweep data.
+Generate training curves from sweep data.
 
 By default, reads pre-extracted scalar data from data/sweep_results.json
 (committed to the repo for reproducibility). Use --from-tensorboard to
@@ -147,10 +147,6 @@ def plot(all_data: dict) -> None:
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     fig, axes = plt.subplots(2, 2, figsize=(10, 7.2))
-    fig.suptitle(
-        "Conservative Q-Learning training curves (hyperparameter sweep)",
-        fontsize=12, fontweight="bold", y=0.98,
-    )
 
     flat_axes = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
 
@@ -175,13 +171,8 @@ def plot(all_data: dict) -> None:
         handles, labels_leg, loc="lower center", ncol=3, fontsize=9,
         frameon=True, bbox_to_anchor=(0.5, 0.02),
     )
-    fig.text(
-        0.5, 0.005,
-        "Figure 2. Conservative Q-Learning training curves (hyperparameter sweep). Solid lines: exponential moving average (α=0.9). Best config (α=0.5, lr=1e-3) balances accuracy and efficiency.",
-        ha="center", fontsize=8, style="italic",
-    )
 
-    plt.tight_layout(rect=[0, 0.06, 1, 0.95])
+    plt.tight_layout(rect=[0, 0.04, 1, 1])
 
     png_path = os.path.join(OUTPUT_DIR, "training_curves.png")
     pdf_path = os.path.join(OUTPUT_DIR, "training_curves.pdf")
