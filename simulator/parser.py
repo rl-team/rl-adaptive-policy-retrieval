@@ -1,10 +1,10 @@
 """Parse CMS Medicare Coverage Database CSVs into structured JSON."""
 
 import csv
+import json
+import os
 import re
 import sys
-import os
-import json
 
 csv.field_size_limit(sys.maxsize)
 
@@ -22,10 +22,114 @@ SECTION_MAP = {
 }
 
 # Sources to parse for each target procedure
+
+
 def _get_lcd_sources():
     with open(os.path.join(RAW_DIR, "..", "templates.json"), "r") as f:
         templates = json.load(f)
     return {proc: t.get("sources", {}) for proc, t in templates.items()}
+
+
+def get_sources_for_code(hcpc_code):
+    article_ids = set()
+    lcd_ids = set()
+
+    # 1. Find articles by HCPC code
+    art_hcpc_path = os.path.join(
+        RAW_DIR, "current_article", "current_article_csv", "article_x_hcpc_code.csv")
+    if os.path.exists(art_hcpc_path):
+        with open(art_hcpc_path, "r", encoding="utf-8", errors="replace") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get("hcpc_code_id") == hcpc_code:
+                    article_ids.add(row.get("article_id"))
+
+    # 2. Find LCDs by HCPC code
+    lcd_hcpc_path = os.path.join(
+        RAW_DIR, "current_lcd", "current_lcd_csv", "lcd_x_hcpc_code.csv")
+    if os.path.exists(lcd_hcpc_path):
+        with open(lcd_hcpc_path, "r", encoding="utf-8", errors="replace") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get("hcpc_code_id") == hcpc_code:
+                    lcd_ids.add(row.get("lcd_id"))
+
+    # 3. Find related LCDs from articles
+    art_rel_path = os.path.join(
+        RAW_DIR, "current_article", "current_article_csv", "article_related_documents.csv")
+    if os.path.exists(art_rel_path):
+        with open(art_rel_path, "r", encoding="utf-8", errors="replace") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get("article_id") in article_ids:
+                    r_lcd = row.get("r_lcd_id")
+                    if r_lcd:
+                        lcd_ids.add(r_lcd)
+
+    # 4. Find related articles from LCDs
+    lcd_rel_path = os.path.join(
+        RAW_DIR, "current_lcd", "current_lcd_csv", "lcd_related_documents.csv")
+    if os.path.exists(lcd_rel_path):
+        with open(lcd_rel_path, "r", encoding="utf-8", errors="replace") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get("lcd_id") in lcd_ids:
+                    r_art = row.get("r_article_id")
+                    if r_art:
+                        article_ids.add(r_art)
+                # Reverse relation
+                if row.get("r_article_id") in article_ids:
+                    r_lcd = row.get("lcd_id")
+                    if r_lcd:
+                        lcd_ids.add(r_lcd)
+
+    # 5. Look for related NCDs
+    ncd_ids = set()
+    ncd_sect_map = {}
+    ncd_trkg_path = os.path.join(RAW_DIR, "ncd", "ncd_csv", "ncd_trkg.csv")
+    if os.path.exists(ncd_trkg_path):
+        with open(ncd_trkg_path, "r", encoding="utf-8", errors="replace") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                ncd_id = row.get("NCD_id")
+                sect = row.get("NCD_mnl_sect")
+                if ncd_id and sect:
+                    ncd_sect_map[ncd_id] = sect
+
+    lcd_rel_ncd = os.path.join(
+        RAW_DIR, "current_lcd", "current_lcd_csv", "lcd_related_ncd_documents.csv")
+    if os.path.exists(lcd_rel_ncd):
+        with open(lcd_rel_ncd, "r", encoding="utf-8", errors="replace") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get("lcd_id") in lcd_ids:
+                    ncd_id = row.get("r_ncd_id")
+                    if ncd_id and ncd_id != "0":
+                        ncd_ids.add(ncd_id)
+
+    art_rel_ncd = os.path.join(
+        RAW_DIR, "current_article", "current_article_csv", "article_related_ncd_documents.csv")
+    if os.path.exists(art_rel_ncd):
+        with open(art_rel_ncd, "r", encoding="utf-8", errors="replace") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get("article_id") in article_ids:
+                    ncd_id = row.get("r_ncd_id")
+                    if ncd_id and ncd_id != "0":
+                        ncd_ids.add(ncd_id)
+
+    ncd_sections = set()
+    for nid in ncd_ids:
+        sect = ncd_sect_map.get(nid)
+        if sect:
+            ncd_sections.add(sect)
+
+    return {
+        "lcd_ids": sorted(list(lcd_ids)),
+        "article_ids": sorted(list(article_ids)),
+        "ncd_sections": sorted(list(ncd_sections))
+    }
+
 
 LCD_SOURCES = _get_lcd_sources()
 
@@ -33,10 +137,16 @@ LCD_SOURCES = _get_lcd_sources()
 def strip_html(text):
     if not text:
         return ""
+    # Convert block tags to periods to aid in sentence chunking
+    text = re.sub(r"<(br|p|li|tr|div|h[1-6])[^>]*>", ". ", text, flags=re.IGNORECASE)
+    text = re.sub(r"</(p|li|tr|div|h[1-6])>", ". ", text, flags=re.IGNORECASE)
     text = re.sub(r"<[^>]+>", " ", text)
     text = re.sub(r"&[a-z]+;", " ", text)
     text = re.sub(r"&#\d+;", "", text)
     text = re.sub(r"\s+", " ", text).strip()
+    # Collapse consecutive periods introduced by stripping
+    text = re.sub(r"\.\s*\.", ".", text)
+    text = re.sub(r"^\.", "", text).strip()
     return text
 
 
@@ -86,7 +196,8 @@ def _read_ncd(ncd_sections, text_fields=None):
 
 def _read_articles(article_ids):
     results = []
-    path = os.path.join(RAW_DIR, "current_article", "current_article_csv", "article.csv")
+    path = os.path.join(RAW_DIR, "current_article",
+                        "current_article_csv", "article.csv")
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -108,7 +219,6 @@ def _split_exclusions(sections):
     excl_patterns = [
         r"(?:Nationally\s+)?Non-?[Cc]overed\s+Indications",
         r"Contraindications",
-        r"(?:are|is)\s+not\s+(?:covered|reasonable)",
     ]
     combined = "|".join(excl_patterns)
 
@@ -121,7 +231,8 @@ def _split_exclusions(sections):
             if before:
                 result.append({**s, "text": before})
             if after:
-                result.append({**s, "text": after, "section_type": "exclusions"})
+                result.append(
+                    {**s, "text": after, "section_type": "exclusions"})
         else:
             result.append(s)
     return result
@@ -134,6 +245,12 @@ def parse_cms_data():
     """
     parsed = {}
     for proc_code, sources in LCD_SOURCES.items():
+        if not sources or (not sources.get("lcd_ids") and not sources.get("article_ids") and not sources.get("ncd_sections")):
+            print(
+                f"[parse] Automatically determining sources for {proc_code}...")
+            sources = get_sources_for_code(proc_code)
+            print(f"[parse] Found for {proc_code}: {sources}")
+
         sections = []
         sections.extend(_read_lcd(sources.get("lcd_ids", [])))
         sections.extend(_read_ncd(sources.get("ncd_sections", [])))
@@ -143,41 +260,7 @@ def parse_cms_data():
         for s in sections:
             s["procedure_code"] = proc_code
         parsed[proc_code] = sections
-        
-    # Add some generic/distractor chunks
-    general_sections = []
-    general_sections.append({
-        "source": "admin-100-01",
-        "section_type": "coverage_criteria",
-        "text": "Medicare Part B covers medically necessary services and preventive services. Medically necessary services are defined as services or supplies needed to diagnose or treat a medical condition and that meet accepted standards of medical practice.",
-        "procedure_code": "general"
-    })
-    general_sections.append({
-        "source": "admin-100-01",
-        "section_type": "coverage_criteria",
-        "text": "Prior authorization is required for certain Medicare Part B services as specified by CMS. The prior authorization process ensures that services meet Medicare coverage requirements before they are provided. Providers must submit clinical documentation supporting medical necessity.",
-        "procedure_code": "general"
-    })
-    general_sections.append({
-        "source": "admin-100-02",
-        "section_type": "coverage_criteria",
-        "text": "Evidence-based clinical guidelines should be used to support prior authorization decisions. The American Medical Association and specialty societies publish guidelines that inform coverage determinations. Payers should reference the most current published guidelines.",
-        "procedure_code": "general"
-    })
-    general_sections.append({
-        "source": "admin-100-02",
-        "section_type": "billing",
-        "text": "Claims for prior authorized services must include the prior authorization number on the CMS-1500 or UB-04 claim form. Failure to include the authorization number may result in claim denial. Electronic claims should include the authorization in the appropriate loop and segment.",
-        "procedure_code": "general"
-    })
-    general_sections.append({
-        "source": "admin-100-03",
-        "section_type": "coverage_criteria",
-        "text": "The appeals process for denied prior authorization requests is available to all Medicare beneficiaries. The first level of appeal is a redetermination by the Medicare Administrative Contractor. Subsequent appeal levels include reconsideration by a Qualified Independent Contractor and hearing by an Administrative Law Judge.",
-        "procedure_code": "general"
-    })
-    parsed["general"] = general_sections
-    
+
     return parsed
 
 
@@ -186,7 +269,8 @@ if __name__ == "__main__":
     for proc, sections in data.items():
         print(f"{proc}: {len(sections)} sections, "
               f"{sum(len(s['text']) for s in sections)} total chars")
-    out_path = os.path.join(os.path.dirname(__file__), "..", "data", "cms_parsed.json")
+    out_path = os.path.join(os.path.dirname(__file__),
+                            "..", "data", "cms_parsed.json")
     with open(out_path, "w") as f:
         json.dump(data, f, indent=2)
     print(f"Wrote {out_path}")
