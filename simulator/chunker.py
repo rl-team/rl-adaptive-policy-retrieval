@@ -13,7 +13,10 @@ def chunk_text(text, min_chars=MIN_CHUNK_CHARS, max_words=MAX_CHUNK_WORDS):
     Splits on sentence-ending boundaries to produce chunks of roughly
     paragraph size (up to max_words each).
     """
-    # Split on patterns that look like paragraph boundaries
+    # Split on patterns that look like paragraph boundaries.
+    # Note: the second branch splits on ". A" (period + uppercase), which may
+    # incorrectly split on abbreviations like "Dr. Smith". CMS policy text is
+    # formal and rarely uses such abbreviations, so this is acceptable here.
     raw_parts = re.split(r"(?:\.\s{2,})|(?:\.\s*(?=[A-Z][a-z]))", text)
 
     chunks = []
