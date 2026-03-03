@@ -35,27 +35,15 @@
       "physical_therapy",
       "chiropractic"
     ],
-    "min_coverage_chunks": 2,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "34220",
-        "35391",
         "37279",
         "37281"
       ],
-      "article_ids": [
-        "56017",
-        "56018",
-        "56848",
-        "57206",
-        "57207",
-        "58559"
-      ],
       "ncd_sections": [
-        "220.1",
-        "220.2",
-        "220.6.17",
-        "220.6.19"
+        "220.1"
       ]
     }
   },
@@ -96,7 +84,7 @@
       "physical_therapy",
       "corticosteroid_injection"
     ],
-    "min_coverage_chunks": 2,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "36575"
@@ -109,46 +97,51 @@
       ]
     }
   },
-  "80053": {
-    "name": "Comprehensive Metabolic Panel",
+  "92507": {
+    "name": "Speech-Language Pathology",
     "common_diagnoses": [
       {
-        "code": "E11.9",
-        "name": "Type 2 diabetes mellitus",
-        "weight": 0.5
+        "code": "R13.10",
+        "name": "Dysphagia, unspecified",
+        "weight": 0.4
       },
       {
-        "code": "E78.5",
-        "name": "Hyperlipidemia",
-        "weight": 0.3
+        "code": "R47.01",
+        "name": "Aphasia",
+        "weight": 0.35
       },
       {
-        "code": "Z00.00",
-        "name": "General adult medical exam",
-        "weight": 0.2
+        "code": "F80.2",
+        "name": "Mixed receptive-expressive language disorder",
+        "weight": 0.25
       }
     ],
     "age_range": [
-      18,
-      90
+      3,
+      85
     ],
     "typical_prior_treatments": [
-      "diet_modification",
-      "metformin",
-      "statins"
+      "speech_evaluation",
+      "hearing_screening",
+      "neurological_assessment"
     ],
     "requires_diagnosis_prefix": [
-      "E11",
-      "E78",
-      "Z00"
+      "R13",
+      "R47",
+      "F80"
     ],
     "requires_prior_treatments": [
-      "diet_modification"
+      "speech_evaluation"
     ],
-    "min_coverage_chunks": 1,
+    "min_coverage_chunks": 2,
     "sources": {
+      "lcd_ids": [
+        "33580",
+        "34046"
+      ],
       "ncd_sections": [
-        "190.22"
+        "170.1",
+        "170.3"
       ]
     }
   },
@@ -188,21 +181,16 @@
     "requires_prior_treatments": [
       "chest_xray"
     ],
-    "min_coverage_chunks": 2,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
-        "33459",
-        "35391"
+        "33459"
       ],
       "article_ids": [
-        "56580",
-        "56848",
-        "58559"
+        "56580"
       ],
       "ncd_sections": [
-        "220.1",
-        "220.6.17",
-        "220.6.19"
+        "220.1"
       ]
     }
   },
@@ -247,14 +235,256 @@
       "epidural_injection",
       "MRI_imaging"
     ],
-    "min_coverage_chunks": 3,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "37848"
+      ]
+    }
+  },
+  "93306": {
+    "name": "Transthoracic Echocardiogram",
+    "common_diagnoses": [
+      {
+        "code": "I50.9",
+        "name": "Heart failure, unspecified",
+        "weight": 0.4
+      },
+      {
+        "code": "I35.0",
+        "name": "Nonrheumatic aortic valve stenosis",
+        "weight": 0.35
+      },
+      {
+        "code": "R07.9",
+        "name": "Chest pain, unspecified",
+        "weight": 0.25
+      }
+    ],
+    "age_range": [
+      25,
+      90
+    ],
+    "typical_prior_treatments": [
+      "ECG",
+      "chest_xray",
+      "cardiac_auscultation"
+    ],
+    "requires_diagnosis_prefix": [
+      "I50",
+      "I35",
+      "R07"
+    ],
+    "requires_prior_treatments": [
+      "ECG"
+    ],
+    "min_coverage_chunks": 3,
+    "sources": {
+      "lcd_ids": [
+        "33577"
       ],
       "article_ids": [
-        "56396",
-        "56397"
+        "55668"
+      ],
+      "ncd_sections": [
+        "220.5"
+      ]
+    }
+  },
+  "43239": {
+    "name": "Upper GI Endoscopy with Biopsy",
+    "common_diagnoses": [
+      {
+        "code": "K21.0",
+        "name": "GERD with esophagitis",
+        "weight": 0.4
+      },
+      {
+        "code": "R13.10",
+        "name": "Dysphagia, unspecified",
+        "weight": 0.35
+      },
+      {
+        "code": "K92.2",
+        "name": "GI hemorrhage, unspecified",
+        "weight": 0.25
+      }
+    ],
+    "age_range": [
+      18,
+      85
+    ],
+    "typical_prior_treatments": [
+      "PPI_therapy",
+      "H2_blockers",
+      "barium_swallow"
+    ],
+    "requires_diagnosis_prefix": [
+      "K21",
+      "R13",
+      "K92"
+    ],
+    "requires_prior_treatments": [
+      "PPI_therapy"
+    ],
+    "min_coverage_chunks": 2,
+
+    "sources": {
+      "lcd_ids": [
+        "33583",
+        "35350"
+      ],
+      "article_ids": [
+        "56389"
+      ],
+      "ncd_sections": [
+        "100.4"
+      ]
+    }
+  },
+  "77067": {
+    "name": "Screening Mammography",
+    "common_diagnoses": [
+      {
+        "code": "Z80.3",
+        "name": "Family history of breast cancer",
+        "weight": 0.4
+      },
+      {
+        "code": "N63.10",
+        "name": "Unspecified lump in breast",
+        "weight": 0.3
+      },
+      {
+        "code": "Z12.31",
+        "name": "Encounter for screening mammogram",
+        "weight": 0.3
+      }
+    ],
+    "age_range": [
+      40,
+      80
+    ],
+    "typical_prior_treatments": [
+      "clinical_breast_exam",
+      "self_breast_exam"
+    ],
+    "requires_diagnosis_prefix": [
+      "Z80",
+      "N63",
+      "Z12"
+    ],
+    "requires_prior_treatments": [
+      "clinical_breast_exam"
+    ],
+    "min_coverage_chunks": 4,
+    "sources": {
+      "lcd_ids": [
+        "33950"
+      ],
+      "article_ids": [
+        "56448"
+      ],
+      "ncd_sections": [
+        "220.4"
+      ]
+    }
+  },
+  "90837": {
+    "name": "Psychotherapy, 53 minutes",
+    "common_diagnoses": [
+      {
+        "code": "F33.0",
+        "name": "Major depressive disorder, recurrent, mild",
+        "weight": 0.4
+      },
+      {
+        "code": "F41.1",
+        "name": "Generalized anxiety disorder",
+        "weight": 0.35
+      },
+      {
+        "code": "F43.10",
+        "name": "Post-traumatic stress disorder",
+        "weight": 0.25
+      }
+    ],
+    "age_range": [
+      18,
+      80
+    ],
+    "typical_prior_treatments": [
+      "psychiatric_evaluation",
+      "medication_trial",
+      "counseling"
+    ],
+    "requires_diagnosis_prefix": [
+      "F33",
+      "F41",
+      "F43"
+    ],
+    "requires_prior_treatments": [
+      "psychiatric_evaluation"
+    ],
+    "min_coverage_chunks": 3,
+    "sources": {
+      "lcd_ids": [
+        "33626",
+        "34353"
+      ],
+      "article_ids": [
+        "56685"
+      ],
+      "ncd_sections": [
+        "130.1"
+      ]
+    }
+  },
+  "95810": {
+    "name": "Polysomnography",
+    "common_diagnoses": [
+      {
+        "code": "G47.33",
+        "name": "Obstructive sleep apnea",
+        "weight": 0.5
+      },
+      {
+        "code": "G47.00",
+        "name": "Insomnia, unspecified",
+        "weight": 0.3
+      },
+      {
+        "code": "G47.411",
+        "name": "Narcolepsy with cataplexy",
+        "weight": 0.2
+      }
+    ],
+    "age_range": [
+      18,
+      80
+    ],
+    "typical_prior_treatments": [
+      "sleep_hygiene_education",
+      "clinical_sleep_assessment",
+      "Epworth_sleepiness_scale"
+    ],
+    "requires_diagnosis_prefix": [
+      "G47"
+    ],
+    "requires_prior_treatments": [
+      "clinical_sleep_assessment"
+    ],
+    "min_coverage_chunks": 3,
+    "sources": {
+      "lcd_ids": [
+        "33405",
+        "36222"
+      ],
+      "article_ids": [
+        "53019"
+      ],
+      "ncd_sections": [
+        "240.4"
       ]
     }
   }
