@@ -3,9 +3,9 @@ import json
 import os
 import sys
 
-from simulator.parser import get_sources_for_code
-
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+from simulator.parser import get_sources_for_code
 
 
 if __name__ == "__main__":

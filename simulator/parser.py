@@ -212,8 +212,15 @@ def _read_articles(article_ids):
     return results
 
 
-def _split_exclusions(sections):
-    """Post-process sections to split out exclusion content from coverage text."""
+def _split_exclusions(sections, min_prefix_length=100):
+    """Post-process sections to split out exclusion content from coverage text.
+    
+    Args:
+        sections: List of section dicts.
+        min_prefix_length: Minimum characters before the exclusion pattern to split.
+            This threshold (default 100) prevents splitting on Table of Contents 
+            or very short introductory text.
+    """
     result = []
     # Patterns that indicate start of exclusion / noncovered content
     excl_patterns = [
@@ -225,7 +232,7 @@ def _split_exclusions(sections):
     for s in sections:
         text = s["text"]
         match = re.search(combined, text)
-        if match and match.start() > 100:
+        if match and match.start() > min_prefix_length:
             before = text[:match.start()].strip()
             after = text[match.start():].strip()
             if before:
