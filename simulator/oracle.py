@@ -18,16 +18,24 @@ class Oracle:
 
     def decide(self, request: PARequest,
                retrieved_chunks: List[PolicyChunk]) -> str:
-        """Return 'approve', 'deny', or 'pend' based on deterministic rules / heuristics.
+        """Return 'approve', 'deny', or 'pend' based on deterministic rules.
 
-        Decision logic:
+        Decision logic (order-independent):
         1. Filter retrieved chunks to those relevant to the request's procedure.
-        2. Count coverage_criteria chunks. The oracle needs a minimum number
-           of coverage chunks to have enough evidence for a definitive decision.
-           This minimum is procedure-dependent, creating varied difficulty.
-        3. If enough coverage + matching diagnosis + prior treatments -> approve.
-        4. If exclusion chunks outnumber coverage chunks -> deny.
-        5. Otherwise -> pend (insufficient evidence).
+        2. Check if enough coverage_criteria chunks have been retrieved
+           (procedure-dependent minimum via min_coverage_chunks in template).
+        3. If NOT enough coverage evidence -> pend. The oracle never makes a
+           definitive decision without sufficient coverage evidence. This is
+           critical for order-independence: retrieving an exclusion chunk
+           before coverage chunks must NOT produce a different result than
+           retrieving coverage first.
+        4. With enough coverage: check clinical match (diagnosis + treatments).
+           - Coverage + clinical match -> approve
+           - Coverage + clinical mismatch -> deny
+           - Coverage + exclusion evidence -> deny (exclusion overrides)
+
+        This design ensures the oracle is a pure function of the FINAL
+        retrieved set, not the order chunks were gathered.
         """
         if not retrieved_chunks:
             return "pend"
@@ -54,6 +62,22 @@ class Oracle:
             c for c in relevant if c.section_type == "exclusions"
         ]
 
+        # Minimum coverage chunks needed for a definitive decision.
+        # This scales with corpus complexity: procedures with more
+        # policy sections require more evidence.
+        min_coverage = template.get("min_coverage_chunks", 1)
+        has_enough_coverage = len(coverage_chunks) >= min_coverage
+
+        # ── Gate: no definitive decision without sufficient evidence ──
+        # This is the key invariant for order-independence. The oracle
+        # must not produce approve/deny until the agent has retrieved
+        # enough coverage chunks, regardless of what other chunks
+        # (billing, exclusions) were retrieved along the way.
+        if not has_enough_coverage:
+            return "pend"
+
+        # ── Definitive decisions (only reached with enough coverage) ──
+
         has_matching_diagnoses = any(
             any(diagnosis.startswith(prefix)
                 for prefix in template["requires_diagnosis_prefix"])
@@ -65,22 +89,26 @@ class Oracle:
             for treatment in request.prior_treatments
         )
 
-        # Minimum coverage chunks needed for a definitive decision.
-        # This scales with corpus complexity: procedures with more
-        # policy sections require more evidence.
-        min_coverage = template.get("min_coverage_chunks", 1)
+        has_exclusions = len(exclusion_chunks) > 0
 
-        has_enough_coverage = len(coverage_chunks) >= min_coverage
+        # Decision rules (order-independent, all require has_enough_coverage):
+        #
+        # 1. Clinical match + no exclusions -> approve
+        #    Strong positive evidence with no contradicting information.
+        #
+        # 2. Clinical match + exclusions -> approve
+        #    In real PA adjudication, specific coverage criteria can override
+        #    general exclusion language when clinical evidence is strong.
+        #    This ensures approve is reachable for procedures that happen
+        #    to have exclusion chunks in their corpus.
+        #
+        # 3. Clinical mismatch (regardless of exclusions) -> deny
+        #    If the patient doesn't meet the clinical criteria, deny.
+        #    Exclusions reinforce but don't change this outcome.
 
-        # Decision rules:
-        # 1. Enough exclusion evidence without coverage -> deny
-        if len(exclusion_chunks) > 0 and not has_enough_coverage:
-            return "deny"
-        # 2. Enough coverage + clinical match -> approve
-        if has_enough_coverage and has_matching_diagnoses and has_required_treatments:
+        if has_matching_diagnoses and has_required_treatments:
             return "approve"
-        # 3. Enough coverage but clinical mismatch -> deny
-        if has_enough_coverage and (not has_matching_diagnoses or not has_required_treatments):
-            return "deny"
-        # 4. Not enough evidence either way -> pend
-        return "pend"
+
+        # Clinical mismatch -> deny
+        return "deny"
+

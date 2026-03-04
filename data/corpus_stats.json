@@ -1,26 +1,26 @@
 {
-  "total_chunks": 97,
+  "total_chunks": 124,
   "total_procedures": 10,
   "section_type_counts": {
-    "coverage_criteria": 84,
-    "exclusions": 3,
-    "billing": 10
+    "coverage_criteria": 102,
+    "exclusions": 6,
+    "billing": 16
   },
   "procedures": {
     "22633": {
       "name": "Lumbar Spinal Fusion",
-      "total_chunks": 2,
-      "corpus_pct": 2.1,
+      "total_chunks": 4,
+      "corpus_pct": 3.2,
       "coverage_criteria": 2,
       "exclusions": 0,
-      "billing": 0,
+      "billing": 2,
       "min_coverage_chunks": 1,
       "difficulty": "easy"
     },
     "29881": {
       "name": "Knee Arthroscopy",
       "total_chunks": 6,
-      "corpus_pct": 6.2,
+      "corpus_pct": 4.8,
       "coverage_criteria": 4,
       "exclusions": 0,
       "billing": 2,
@@ -30,7 +30,7 @@
     "43239": {
       "name": "Upper GI Endoscopy with Biopsy",
       "total_chunks": 8,
-      "corpus_pct": 8.2,
+      "corpus_pct": 6.5,
       "coverage_criteria": 7,
       "exclusions": 0,
       "billing": 1,
@@ -39,28 +39,28 @@
     },
     "71260": {
       "name": "CT Chest with Contrast",
-      "total_chunks": 5,
-      "corpus_pct": 5.2,
-      "coverage_criteria": 4,
-      "exclusions": 0,
-      "billing": 1,
+      "total_chunks": 16,
+      "corpus_pct": 12.9,
+      "coverage_criteria": 12,
+      "exclusions": 2,
+      "billing": 2,
       "min_coverage_chunks": 1,
       "difficulty": "easy"
     },
     "72148": {
       "name": "MRI Lumbar Spine",
-      "total_chunks": 6,
-      "corpus_pct": 6.2,
-      "coverage_criteria": 5,
-      "exclusions": 1,
-      "billing": 0,
+      "total_chunks": 20,
+      "corpus_pct": 16.1,
+      "coverage_criteria": 15,
+      "exclusions": 2,
+      "billing": 3,
       "min_coverage_chunks": 1,
       "difficulty": "easy"
     },
     "77067": {
       "name": "Screening Mammography",
       "total_chunks": 8,
-      "corpus_pct": 8.2,
+      "corpus_pct": 6.5,
       "coverage_criteria": 6,
       "exclusions": 0,
       "billing": 2,
@@ -70,7 +70,7 @@
     "90837": {
       "name": "Psychotherapy, 53 minutes",
       "total_chunks": 20,
-      "corpus_pct": 20.6,
+      "corpus_pct": 16.1,
       "coverage_criteria": 19,
       "exclusions": 0,
       "billing": 1,
@@ -80,7 +80,7 @@
     "92507": {
       "name": "Speech-Language Pathology",
       "total_chunks": 12,
-      "corpus_pct": 12.4,
+      "corpus_pct": 9.7,
       "coverage_criteria": 12,
       "exclusions": 0,
       "billing": 0,
@@ -90,7 +90,7 @@
     "93306": {
       "name": "Transthoracic Echocardiogram",
       "total_chunks": 11,
-      "corpus_pct": 11.3,
+      "corpus_pct": 8.9,
       "coverage_criteria": 10,
       "exclusions": 1,
       "billing": 0,
@@ -100,7 +100,7 @@
     "95810": {
       "name": "Polysomnography",
       "total_chunks": 19,
-      "corpus_pct": 19.6,
+      "corpus_pct": 15.3,
       "coverage_criteria": 15,
       "exclusions": 1,
       "billing": 3,
