@@ -52,6 +52,10 @@ class PASimulator:
     def encode(self, text: str) -> np.ndarray:
         return self._retriever.encode(text)
 
+    def reset_seed(self, seed: Optional[int] = None) -> None:
+        """Re-initialise the request generator's RNG for reproducible generation."""
+        self._generator.reset_seed(seed)
+
     @property
     def embedding_dim(self) -> int:
         return self._retriever.embedding_dim

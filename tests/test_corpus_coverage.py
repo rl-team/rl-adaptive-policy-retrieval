@@ -24,12 +24,14 @@ from simulator.pa_simulator import PASimulator
 
 # Number of test episodes per procedure
 EPISODES_PER_PROC = 50
-# Random seed
+# Random seed for the shared PASimulator fixture; fixes request generation across runs
 SEED = 99
 # Minimum acceptable per-procedure accuracy at k=7 to confirm solvability
 MIN_ACCURACY_K7 = 0.10
 # Minimum acceptable overall accuracy at k=5
 MIN_OVERALL_K5 = 0.40
+# Allowed slack when asserting that accuracy is approximately non-decreasing with k
+MONOTONICITY_TOLERANCE = 0.05
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 TEMPLATES_PATH = os.path.join(DATA_DIR, "templates.json")
@@ -114,11 +116,11 @@ def test_corpus_stats_covers_all_template_procedures(templates, corpus_stats):
 
 
 def test_procedure_code_populated_on_all_chunks(sim):
-    """Every corpus chunk must have a non-empty procedure_code."""
+    """Every corpus chunk must be annotated with at least one procedure code."""
     corpus = sim.get_corpus()
-    empty = [c.chunk_id for c in corpus if not c.procedure_code]
+    empty = [c.chunk_id for c in corpus if not c.procedure_codes]
     assert not empty, (
-        f"{len(empty)} chunks have empty procedure_code: {empty[:5]}"
+        f"{len(empty)} chunks have empty procedure_codes: {empty[:5]}"
     )
 
 
@@ -127,8 +129,8 @@ def test_procedure_code_populated_on_all_chunks(sim):
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("proc_code", [
-    "22633", "29881", "43239", "71260", "72148",
-    "77067", "90837", "92507", "93306", "95810",
+    "45378", "70450", "70486", "70553", "71260",
+    "72148", "74177", "77067", "92507", "92550",
 ])
 def test_procedure_solvable_at_k7(sim, proc_code):
     """Each procedure must have >0% accuracy at k=7 (procedure is retrievable).
@@ -161,13 +163,19 @@ def test_procedure_solvable_at_k7(sim, proc_code):
 # ---------------------------------------------------------------------------
 
 def test_fixedk_accuracy(sim, all_procedures):
-    """FixedK accuracy must be monotonically non-decreasing: k=3 <= k=5 <= k=7.
+    """FixedK overall accuracy must be approximately non-decreasing: k=3 <= k=5 <= k=7.
+
+    "Approximately" means a regression up to MONOTONICITY_TOLERANCE (5 pp) is
+    tolerated to account for sampling noise across EPISODES_PER_PROC episodes.
 
     Also checks:
     - Overall k=5 accuracy >= MIN_OVERALL_K5
     - No procedure at exactly 0% across ALL three k values
     - k=7 does not achieve 100% across all procedures (corpus isn't trivial)
     """
+    # Reset the shared simulator's RNG so results are independent of which other
+    sim.reset_seed(SEED)
+
     corpus = sim.get_corpus()
 
     # Collect results[k][proc] = (correct, total)
@@ -203,12 +211,14 @@ def test_fixedk_accuracy(sim, all_procedures):
         for k in (3, 5, 7)
     }
 
-    # 1. Monotonic accuracy overall
-    assert overall[3] <= overall[5] + 0.05, (
-        f"Overall accuracy did not improve from k=3 ({overall[3]:.0%}) to k=5 ({overall[5]:.0%})"
+    # 1. Approximately non-decreasing accuracy overall (within MONOTONICITY_TOLERANCE)
+    assert overall[3] <= overall[5] + MONOTONICITY_TOLERANCE, (
+        f"Overall accuracy regressed from k=3 ({overall[3]:.0%}) to k=5 ({overall[5]:.0%}), "
+        f"exceeding allowed tolerance of {MONOTONICITY_TOLERANCE:.0%}"
     )
-    assert overall[5] <= overall[7] + 0.05, (
-        f"Overall accuracy did not improve from k=5 ({overall[5]:.0%}) to k=7 ({overall[7]:.0%})"
+    assert overall[5] <= overall[7] + MONOTONICITY_TOLERANCE, (
+        f"Overall accuracy regressed from k=5 ({overall[5]:.0%}) to k=7 ({overall[7]:.0%}), "
+        f"exceeding allowed tolerance of {MONOTONICITY_TOLERANCE:.0%}"
     )
 
     # 2. k=5 overall >= minimum threshold
@@ -238,8 +248,8 @@ def test_fixedk_accuracy(sim, all_procedures):
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("proc_code", [
-    "22633", "29881", "43239", "71260", "72148",
-    "77067", "90837", "92507", "93306", "95810",
+    "45378", "70450", "70486", "70553", "71260",
+    "72148", "74177", "77067", "92507", "92550",
 ])
 def test_oracle_produces_approve_and_deny(sim, proc_code):
     """With full corpus, oracle must produce both 'approve' and 'deny' for each procedure.

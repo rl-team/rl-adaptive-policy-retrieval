@@ -37,10 +37,15 @@ def generate(corpus_path: str = CORPUS_PATH,
     proc_section: Counter = Counter()
 
     for chunk in corpus:
-        pc = chunk["procedure_code"]
+        # Support both list form (procedure_codes) and legacy single-string form.
+        pcs = chunk.get("procedure_codes")
+        if not pcs:
+            legacy = chunk.get("procedure_code", "")
+            pcs = [legacy] if legacy else []
         st = chunk["section_type"]
-        proc_counts[pc] += 1
-        proc_section[(pc, st)] += 1
+        for pc in pcs:
+            proc_counts[pc] += 1
+            proc_section[(pc, st)] += 1
 
     section_type_counts = {
         st: sum(1 for c in corpus if c["section_type"] == st)
@@ -86,8 +91,11 @@ def _print_table(stats: dict) -> None:
     print(header)
     print(sep)
     for pc, p in sorted(procs.items(), key=lambda x: -x[1]["total_chunks"]):
+        name = p['name']
+        if len(name) > 35:
+            name = name[:32] + "..."
         print(
-            f"{pc:>6}  {p['name']:<35}  {p['total_chunks']:>5}  "
+            f"{pc:>6}  {name:<35}  {p['total_chunks']:>5}  "
             f"{p['corpus_pct']:>4.1f}%  {p['coverage_criteria']:>4}  "
             f"{p['exclusions']:>4}  {p['billing']:>4}  "
             f"{p['min_coverage_chunks']:>7}  {p['difficulty']:<6}"
