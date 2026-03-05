@@ -34,13 +34,18 @@ class SentenceTransformerRetriever:
 
         self._corpus = []
         for i, c in enumerate(raw):
+            # Support both the current list form and the legacy single-string form.
+            procedure_codes = c.get("procedure_codes")
+            if not procedure_codes:
+                legacy = c.get("procedure_code", "")
+                procedure_codes = [legacy] if legacy else []
             self._corpus.append(PolicyChunk(
                 chunk_id=c["chunk_id"],
                 policy_id=c["policy_id"],
                 text=c["text"],
                 embedding=self._embeddings[i],
                 section_type=c["section_type"],
-                procedure_code=c.get("procedure_code", ""),
+                procedure_codes=procedure_codes,
                 metadata={
                     "index": i,
                 },

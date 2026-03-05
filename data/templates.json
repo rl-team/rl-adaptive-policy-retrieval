@@ -35,65 +35,91 @@
       "physical_therapy",
       "chiropractic"
     ],
-    "min_coverage_chunks": 1,
+    "min_coverage_chunks": 2,
     "sources": {
       "lcd_ids": [
         "34220",
+        "35391",
         "37279",
         "37281"
       ],
+      "article_ids": [
+        "56017",
+        "56018",
+        "56848",
+        "57206",
+        "57207",
+        "58559"
+      ],
       "ncd_sections": [
-        "220.1"
+        "220.1",
+        "220.2",
+        "220.6.17",
+        "220.6.19"
       ]
     }
   },
-  "29881": {
-    "name": "Knee Arthroscopy",
+  "92550": {
+    "name": "Tympanometry and Reflex Threshold Measurements",
     "common_diagnoses": [
       {
-        "code": "M23.21",
-        "name": "Derangement of meniscus",
-        "weight": 0.5
+        "code": "H65.9",
+        "name": "Unspecified nonsuppurative otitis media",
+        "weight": 0.4
       },
       {
-        "code": "M17.11",
-        "name": "Primary osteoarthritis, right knee",
-        "weight": 0.3
+        "code": "H90.3",
+        "name": "Sensorineural hearing loss, bilateral",
+        "weight": 0.35
       },
       {
-        "code": "S83.511A",
-        "name": "Sprain of ACL, right knee",
-        "weight": 0.2
+        "code": "H69.90",
+        "name": "Unspecified Eustachian tube disorder",
+        "weight": 0.25
       }
     ],
     "age_range": [
-      16,
-      75
+      5,
+      85
     ],
     "typical_prior_treatments": [
-      "physical_therapy",
-      "corticosteroid_injection",
-      "bracing"
+      "otoscopy",
+      "audiometry",
+      "physical_examination"
     ],
     "requires_diagnosis_prefix": [
-      "M23",
-      "M17",
-      "S83"
+      "H65",
+      "H90",
+      "H69"
     ],
     "requires_prior_treatments": [
-      "physical_therapy",
-      "corticosteroid_injection"
+      "otoscopy",
+      "audiometry"
     ],
-    "min_coverage_chunks": 1,
+    "min_coverage_chunks": 3,
     "sources": {
       "lcd_ids": [
-        "36575"
-      ],
-      "ncd_sections": [
-        "150.9"
+        "35007",
+        "35434",
+        "35448",
+        "35451",
+        "37371"
       ],
       "article_ids": [
-        "52369"
+        "52993",
+        "53252",
+        "55809",
+        "56672",
+        "57205",
+        "57434",
+        "58559",
+        "59601"
+      ],
+      "ncd_sections": [
+        "20.14",
+        "220.5",
+        "240.2",
+        "310.1"
       ]
     }
   },
@@ -133,15 +159,31 @@
     "requires_prior_treatments": [
       "speech_evaluation"
     ],
-    "min_coverage_chunks": 2,
+    "min_coverage_chunks": 4,
     "sources": {
       "lcd_ids": [
         "33580",
-        "34046"
+        "34046",
+        "34429",
+        "34563",
+        "35070"
+      ],
+      "article_ids": [
+        "52866",
+        "53052",
+        "54111",
+        "54753",
+        "56868",
+        "57040"
       ],
       "ncd_sections": [
         "170.1",
-        "170.3"
+        "170.2",
+        "170.3",
+        "50.1",
+        "50.2",
+        "50.3",
+        "50.4"
       ]
     }
   },
@@ -181,133 +223,172 @@
     "requires_prior_treatments": [
       "chest_xray"
     ],
-    "min_coverage_chunks": 1,
+    "min_coverage_chunks": 2,
     "sources": {
       "lcd_ids": [
-        "33459"
+        "33459",
+        "35391"
       ],
       "article_ids": [
-        "56580"
+        "56580",
+        "56848",
+        "58559"
       ],
       "ncd_sections": [
-        "220.1"
+        "220.1",
+        "220.6.17",
+        "220.6.19"
       ]
     }
   },
-  "22633": {
-    "name": "Lumbar Spinal Fusion",
+  "70450": {
+    "name": "CT Head without Contrast",
     "common_diagnoses": [
       {
-        "code": "M43.16",
-        "name": "Spondylolisthesis, lumbar",
+        "code": "S09.90XA",
+        "name": "Unspecified injury of head, initial encounter",
         "weight": 0.4
       },
       {
-        "code": "M48.06",
-        "name": "Spinal stenosis, lumbar",
+        "code": "G45.9",
+        "name": "Transient cerebral ischemic attack, unspecified",
         "weight": 0.35
       },
       {
-        "code": "M51.16",
-        "name": "Lumbar disc herniation",
+        "code": "R51.9",
+        "name": "Headache, unspecified",
         "weight": 0.25
       }
     ],
     "age_range": [
-      25,
-      75
-    ],
-    "typical_prior_treatments": [
-      "physical_therapy",
-      "epidural_injection",
-      "chiropractic",
-      "NSAIDs",
-      "MRI_imaging",
-      "conservative_management"
-    ],
-    "requires_diagnosis_prefix": [
-      "M43",
-      "M48",
-      "M51"
-    ],
-    "requires_prior_treatments": [
-      "physical_therapy",
-      "epidural_injection",
-      "MRI_imaging"
-    ],
-    "min_coverage_chunks": 1,
-    "sources": {
-      "lcd_ids": [
-        "37848"
-      ]
-    }
-  },
-  "93306": {
-    "name": "Transthoracic Echocardiogram",
-    "common_diagnoses": [
-      {
-        "code": "I50.9",
-        "name": "Heart failure, unspecified",
-        "weight": 0.4
-      },
-      {
-        "code": "I35.0",
-        "name": "Nonrheumatic aortic valve stenosis",
-        "weight": 0.35
-      },
-      {
-        "code": "R07.9",
-        "name": "Chest pain, unspecified",
-        "weight": 0.25
-      }
-    ],
-    "age_range": [
-      25,
+      18,
       90
     ],
     "typical_prior_treatments": [
-      "ECG",
-      "chest_xray",
-      "cardiac_auscultation"
+      "neurological_examination",
+      "plain_xray",
+      "clinical_history"
     ],
     "requires_diagnosis_prefix": [
-      "I50",
-      "I35",
-      "R07"
+      "S09",
+      "G45",
+      "R51"
     ],
     "requires_prior_treatments": [
-      "ECG"
+      "neurological_examination"
     ],
     "min_coverage_chunks": 3,
     "sources": {
       "lcd_ids": [
-        "33577"
+        "34417",
+        "35391",
+        "37372",
+        "37373"
       ],
       "article_ids": [
-        "55668"
+        "55517",
+        "56061",
+        "56067",
+        "56612",
+        "56848",
+        "57204",
+        "58559"
       ],
       "ncd_sections": [
-        "220.5"
+        "220.1",
+        "220.2",
+        "220.6.17",
+        "220.6.19"
       ]
     }
   },
-  "43239": {
-    "name": "Upper GI Endoscopy with Biopsy",
+  "45378": {
+    "name": "Colonoscopy, Diagnostic",
     "common_diagnoses": [
       {
-        "code": "K21.0",
-        "name": "GERD with esophagitis",
+        "code": "Z12.11",
+        "name": "Encounter for screening for malignant neoplasm of colon",
         "weight": 0.4
       },
       {
-        "code": "R13.10",
-        "name": "Dysphagia, unspecified",
+        "code": "K92.1",
+        "name": "Melena",
         "weight": 0.35
       },
       {
-        "code": "K92.2",
-        "name": "GI hemorrhage, unspecified",
+        "code": "K57.30",
+        "name": "Diverticulosis of large intestine without perforation or abscess",
         "weight": 0.25
+      }
+    ],
+    "age_range": [
+      45,
+      85
+    ],
+    "typical_prior_treatments": [
+      "FOBT",
+      "stool_DNA_test",
+      "barium_enema"
+    ],
+    "requires_diagnosis_prefix": [
+      "Z12",
+      "K92",
+      "K57"
+    ],
+    "requires_prior_treatments": [
+      "FOBT"
+    ],
+    "min_coverage_chunks": 2,
+    "sources": {
+      "lcd_ids": [
+        "33671",
+        "34005",
+        "34213",
+        "34454",
+        "34614",
+        "36848",
+        "36868",
+        "38812"
+      ],
+      "article_ids": [
+        "55069",
+        "55227",
+        "55555",
+        "55558",
+        "55937",
+        "56212",
+        "56394",
+        "56456",
+        "56632",
+        "57342",
+        "57343",
+        "58428",
+        "58610",
+        "58612"
+      ],
+      "ncd_sections": [
+        "100.2",
+        "210.3"
+      ]
+    }
+  },
+  "70486": {
+    "name": "CT Maxillofacial without Contrast",
+    "common_diagnoses": [
+      {
+        "code": "J32.9",
+        "name": "Chronic sinusitis, unspecified",
+        "weight": 0.45
+      },
+      {
+        "code": "S02.400A",
+        "name": "Malar, maxillary, and zygoma fracture, initial encounter",
+        "weight": 0.35
+      },
+      {
+        "code": "J33.9",
+        "name": "Nasal polyp, unspecified",
+        "weight": 0.2
       }
     ],
     "age_range": [
@@ -315,30 +396,33 @@
       85
     ],
     "typical_prior_treatments": [
-      "PPI_therapy",
-      "H2_blockers",
-      "barium_swallow"
+      "sinus_xray",
+      "nasal_endoscopy",
+      "antibiotics"
     ],
     "requires_diagnosis_prefix": [
-      "K21",
-      "R13",
-      "K92"
+      "J32",
+      "S02",
+      "J33"
     ],
     "requires_prior_treatments": [
-      "PPI_therapy"
+      "antibiotics"
     ],
     "min_coverage_chunks": 2,
-
     "sources": {
       "lcd_ids": [
-        "33583",
-        "35350"
+        "37372",
+        "37373"
       ],
       "article_ids": [
-        "56389"
+        "56061",
+        "56067",
+        "57204",
+        "58559"
       ],
       "ncd_sections": [
-        "100.4"
+        "220.1",
+        "220.2"
       ]
     }
   },
@@ -377,35 +461,94 @@
     "requires_prior_treatments": [
       "clinical_breast_exam"
     ],
-    "min_coverage_chunks": 4,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "33950"
       ],
       "article_ids": [
-        "56448"
+        "56448",
+        "57848",
+        "58559"
       ],
       "ncd_sections": [
-        "220.4"
+        "220.4",
+        "220.5"
       ]
     }
   },
-  "90837": {
-    "name": "Psychotherapy, 53 minutes",
+  "74177": {
+    "name": "CT Abdomen and Pelvis with Contrast",
     "common_diagnoses": [
       {
-        "code": "F33.0",
-        "name": "Major depressive disorder, recurrent, mild",
+        "code": "R10.9",
+        "name": "Unspecified abdominal pain",
         "weight": 0.4
       },
       {
-        "code": "F41.1",
-        "name": "Generalized anxiety disorder",
+        "code": "C18.9",
+        "name": "Malignant neoplasm of colon, unspecified",
         "weight": 0.35
       },
       {
-        "code": "F43.10",
-        "name": "Post-traumatic stress disorder",
+        "code": "K57.32",
+        "name": "Diverticulitis of large intestine without abscess",
+        "weight": 0.25
+      }
+    ],
+    "age_range": [
+      18,
+      85
+    ],
+    "typical_prior_treatments": [
+      "abdominal_xray",
+      "ultrasound",
+      "labs"
+    ],
+    "requires_diagnosis_prefix": [
+      "R10",
+      "C18",
+      "K57"
+    ],
+    "requires_prior_treatments": [
+      "abdominal_xray",
+      "ultrasound"
+    ],
+    "min_coverage_chunks": 2,
+    "sources": {
+      "lcd_ids": [
+        "34415",
+        "35391"
+      ],
+      "article_ids": [
+        "56421",
+        "56848",
+        "58559",
+        "59140"
+      ],
+      "ncd_sections": [
+        "220.1",
+        "220.6.17",
+        "220.6.19"
+      ]
+    }
+  },
+  "70553": {
+    "name": "MRI Brain with and without Contrast",
+    "common_diagnoses": [
+      {
+        "code": "G35",
+        "name": "Multiple sclerosis",
+        "weight": 0.4
+      },
+      {
+        "code": "C71.9",
+        "name": "Malignant neoplasm of brain, unspecified",
+        "weight": 0.35
+      },
+      {
+        "code": "G43.909",
+        "name": "Migraine, unspecified",
         "weight": 0.25
       }
     ],
@@ -414,77 +557,38 @@
       80
     ],
     "typical_prior_treatments": [
-      "psychiatric_evaluation",
-      "medication_trial",
-      "counseling"
+      "neurological_examination",
+      "CT_head",
+      "EEG"
     ],
     "requires_diagnosis_prefix": [
-      "F33",
-      "F41",
-      "F43"
+      "G35",
+      "C71",
+      "G43"
     ],
     "requires_prior_treatments": [
-      "psychiatric_evaluation"
+      "neurological_examination",
+      "CT_head"
     ],
-    "min_coverage_chunks": 3,
+    "min_coverage_chunks": 2,
     "sources": {
       "lcd_ids": [
-        "33626",
-        "34353"
+        "35391",
+        "37372",
+        "37373"
       ],
       "article_ids": [
-        "56685"
+        "56061",
+        "56067",
+        "56848",
+        "57204",
+        "58559"
       ],
       "ncd_sections": [
-        "130.1"
-      ]
-    }
-  },
-  "95810": {
-    "name": "Polysomnography",
-    "common_diagnoses": [
-      {
-        "code": "G47.33",
-        "name": "Obstructive sleep apnea",
-        "weight": 0.5
-      },
-      {
-        "code": "G47.00",
-        "name": "Insomnia, unspecified",
-        "weight": 0.3
-      },
-      {
-        "code": "G47.411",
-        "name": "Narcolepsy with cataplexy",
-        "weight": 0.2
-      }
-    ],
-    "age_range": [
-      18,
-      80
-    ],
-    "typical_prior_treatments": [
-      "sleep_hygiene_education",
-      "clinical_sleep_assessment",
-      "Epworth_sleepiness_scale"
-    ],
-    "requires_diagnosis_prefix": [
-      "G47"
-    ],
-    "requires_prior_treatments": [
-      "clinical_sleep_assessment"
-    ],
-    "min_coverage_chunks": 3,
-    "sources": {
-      "lcd_ids": [
-        "33405",
-        "36222"
-      ],
-      "article_ids": [
-        "53019"
-      ],
-      "ncd_sections": [
-        "240.4"
+        "220.1",
+        "220.2",
+        "220.6.17",
+        "220.6.19"
       ]
     }
   }

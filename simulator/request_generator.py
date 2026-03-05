@@ -17,7 +17,18 @@ class PARequestGenerator:
     def __init__(self, templates_path: str = DEFAULT_TEMPLATES, seed: int = 42):
         with open(templates_path) as f:
             self.templates = json.load(f)
+        self._seed = seed
         self._rng = np.random.default_rng(seed)
+        self._counter = 0
+
+    def reset_seed(self, seed: Optional[int] = None) -> None:
+        """Re-initialise the RNG to make subsequent generation reproducible.
+
+        If *seed* is None the original construction seed is reused.
+        The request counter is also reset so request IDs start from req_0001 again.
+        """
+        self._seed = seed if seed is not None else self._seed
+        self._rng = np.random.default_rng(self._seed)
         self._counter = 0
 
     def generate(self, procedure_code: Optional[str] = None) -> PARequest:

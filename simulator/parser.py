@@ -24,8 +24,18 @@ SECTION_MAP = {
 # Sources to parse for each target procedure
 
 
-def _get_lcd_sources():
-    with open(os.path.join(RAW_DIR, "..", "templates.json"), "r") as f:
+_LCD_SOURCES: dict | None = None
+
+
+def _get_lcd_sources() -> dict:
+    templates_path = os.path.join(RAW_DIR, "..", "templates.json")
+    if not os.path.exists(templates_path):
+        raise FileNotFoundError(
+            f"templates.json not found at {os.path.abspath(templates_path)}. "
+            "Run scripts/parse_cms_data.py from the project root to generate it, "
+            "or set the working directory to the project root before importing this module."
+        )
+    with open(templates_path, "r") as f:
         templates = json.load(f)
     return {proc: t.get("sources", {}) for proc, t in templates.items()}
 
@@ -131,9 +141,6 @@ def get_sources_for_code(hcpc_code):
     }
 
 
-LCD_SOURCES = _get_lcd_sources()
-
-
 def strip_html(text):
     if not text:
         return ""
@@ -144,8 +151,8 @@ def strip_html(text):
     text = re.sub(r"&[a-z]+;", " ", text)
     text = re.sub(r"&#\d+;", "", text)
     text = re.sub(r"\s+", " ", text).strip()
-    # Collapse consecutive periods introduced by stripping
-    text = re.sub(r"\.\s*\.", ".", text)
+    # Collapse runs of periods (with optional whitespace) introduced by stripping
+    text = re.sub(r"\.(\s*\.)+", ".", text)
     text = re.sub(r"^\.", "", text).strip()
     return text
 
@@ -245,18 +252,30 @@ def _split_exclusions(sections, min_prefix_length=100):
     return result
 
 
-def parse_cms_data():
+def parse_cms_data(discovered: dict | None = None):
     """Parse all relevant CMS sources for target procedures.
+
+    Args:
+        discovered: Optional dict to populate with auto-discovered sources,
+                    keyed by procedure_code. Pass an empty dict to collect
+                    the sources that were automatically determined (i.e. missing
+                    from templates.json) so the caller can persist them.
 
     Returns dict mapping procedure_code -> list of {source, section_type, text, procedure_code}.
     """
+    global _LCD_SOURCES
+    if _LCD_SOURCES is None:
+        _LCD_SOURCES = _get_lcd_sources()
+
     parsed = {}
-    for proc_code, sources in LCD_SOURCES.items():
+    for proc_code, sources in _LCD_SOURCES.items():
         if not sources or (not sources.get("lcd_ids") and not sources.get("article_ids") and not sources.get("ncd_sections")):
             print(
                 f"[parse] Automatically determining sources for {proc_code}...")
             sources = get_sources_for_code(proc_code)
             print(f"[parse] Found for {proc_code}: {sources}")
+            if discovered is not None:
+                discovered[proc_code] = sources
 
         sections = []
         sections.extend(_read_lcd(sources.get("lcd_ids", [])))
