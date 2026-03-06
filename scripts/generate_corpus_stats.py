@@ -33,19 +33,27 @@ def generate(corpus_path: str = CORPUS_PATH,
         templates = json.load(f)
 
     total = len(corpus)
-    proc_counts: Counter = Counter()
+
+    # Build per-procedure chunk sets and section counts.
+    # Each chunk may belong to multiple procedures (procedure_codes list).
+    proc_chunk_ids: dict = {}   # proc -> set of chunk indices
     proc_section: Counter = Counter()
 
-    for chunk in corpus:
-        # Support both list form (procedure_codes) and legacy single-string form.
+    for i, chunk in enumerate(corpus):
         pcs = chunk.get("procedure_codes")
         if not pcs:
             legacy = chunk.get("procedure_code", "")
             pcs = [legacy] if legacy else []
         st = chunk["section_type"]
         for pc in pcs:
-            proc_counts[pc] += 1
+            proc_chunk_ids.setdefault(pc, set()).add(i)
             proc_section[(pc, st)] += 1
+
+    # Count chunks shared across multiple procedures
+    shared_count = sum(
+        1 for c in corpus
+        if len(c.get("procedure_codes", [c.get("procedure_code", "")])) > 1
+    )
 
     section_type_counts = {
         st: sum(1 for c in corpus if c["section_type"] == st)
@@ -54,7 +62,13 @@ def generate(corpus_path: str = CORPUS_PATH,
 
     procedures: dict = {}
     for pc in sorted(templates.keys()):
-        n = proc_counts.get(pc, 0)
+        chunk_ids = proc_chunk_ids.get(pc, set())
+        n = len(chunk_ids)
+        # Count how many of this procedure's chunks are shared
+        n_shared = sum(
+            1 for idx in chunk_ids
+            if len(corpus[idx].get("procedure_codes", [])) > 1
+        )
         cov = proc_section.get((pc, "coverage_criteria"), 0)
         exc = proc_section.get((pc, "exclusions"), 0)
         bill = proc_section.get((pc, "billing"), 0)
@@ -62,6 +76,7 @@ def generate(corpus_path: str = CORPUS_PATH,
         procedures[pc] = {
             "name": templates[pc]["name"],
             "total_chunks": n,
+            "shared_chunks": n_shared,
             "corpus_pct": round(n / total * 100, 1) if total else 0.0,
             "coverage_criteria": cov,
             "exclusions": exc,
@@ -72,6 +87,7 @@ def generate(corpus_path: str = CORPUS_PATH,
 
     stats = {
         "total_chunks": total,
+        "shared_chunks": shared_count,
         "total_procedures": len(templates),
         "section_type_counts": section_type_counts,
         "procedures": procedures,

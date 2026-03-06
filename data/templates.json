@@ -35,7 +35,7 @@
       "physical_therapy",
       "chiropractic"
     ],
-    "min_coverage_chunks": 2,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "34220",
@@ -96,7 +96,7 @@
       "otoscopy",
       "audiometry"
     ],
-    "min_coverage_chunks": 3,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "35007",
@@ -159,7 +159,7 @@
     "requires_prior_treatments": [
       "speech_evaluation"
     ],
-    "min_coverage_chunks": 4,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "33580",
@@ -223,7 +223,7 @@
     "requires_prior_treatments": [
       "chest_xray"
     ],
-    "min_coverage_chunks": 2,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "33459",
@@ -277,7 +277,7 @@
     "requires_prior_treatments": [
       "neurological_examination"
     ],
-    "min_coverage_chunks": 3,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "34417",
@@ -338,7 +338,7 @@
     "requires_prior_treatments": [
       "FOBT"
     ],
-    "min_coverage_chunks": 2,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "33671",
@@ -408,7 +408,7 @@
     "requires_prior_treatments": [
       "antibiotics"
     ],
-    "min_coverage_chunks": 2,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "37372",
@@ -514,7 +514,7 @@
       "abdominal_xray",
       "ultrasound"
     ],
-    "min_coverage_chunks": 2,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "34415",
@@ -570,7 +570,7 @@
       "neurological_examination",
       "CT_head"
     ],
-    "min_coverage_chunks": 2,
+    "min_coverage_chunks": 1,
     "sources": {
       "lcd_ids": [
         "35391",

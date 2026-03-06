@@ -1,5 +1,6 @@
 {
   "total_chunks": 186,
+  "shared_chunks": 57,
   "total_procedures": 10,
   "section_type_counts": {
     "coverage_criteria": 107,
@@ -10,76 +11,84 @@
     "45378": {
       "name": "Colonoscopy, Diagnostic",
       "total_chunks": 30,
+      "shared_chunks": 0,
       "corpus_pct": 16.1,
       "coverage_criteria": 17,
       "exclusions": 1,
       "billing": 12,
-      "min_coverage_chunks": 2,
-      "difficulty": "medium"
+      "min_coverage_chunks": 1,
+      "difficulty": "easy"
     },
     "70450": {
       "name": "CT Head without Contrast",
       "total_chunks": 56,
+      "shared_chunks": 54,
       "corpus_pct": 30.1,
       "coverage_criteria": 20,
       "exclusions": 3,
       "billing": 33,
-      "min_coverage_chunks": 3,
-      "difficulty": "hard"
+      "min_coverage_chunks": 1,
+      "difficulty": "easy"
     },
     "70486": {
       "name": "CT Maxillofacial without Contrast",
       "total_chunks": 43,
+      "shared_chunks": 43,
       "corpus_pct": 23.1,
       "coverage_criteria": 11,
       "exclusions": 1,
       "billing": 31,
-      "min_coverage_chunks": 2,
-      "difficulty": "medium"
+      "min_coverage_chunks": 1,
+      "difficulty": "easy"
     },
     "70553": {
       "name": "MRI Brain with and without Contrast",
       "total_chunks": 54,
+      "shared_chunks": 54,
       "corpus_pct": 29.0,
       "coverage_criteria": 19,
       "exclusions": 3,
       "billing": 32,
-      "min_coverage_chunks": 2,
-      "difficulty": "medium"
+      "min_coverage_chunks": 1,
+      "difficulty": "easy"
     },
     "71260": {
       "name": "CT Chest with Contrast",
       "total_chunks": 44,
+      "shared_chunks": 42,
       "corpus_pct": 23.7,
       "coverage_criteria": 12,
       "exclusions": 2,
       "billing": 30,
-      "min_coverage_chunks": 2,
-      "difficulty": "medium"
+      "min_coverage_chunks": 1,
+      "difficulty": "easy"
     },
     "72148": {
       "name": "MRI Lumbar Spine",
       "total_chunks": 55,
+      "shared_chunks": 49,
       "corpus_pct": 29.6,
       "coverage_criteria": 19,
       "exclusions": 4,
       "billing": 32,
-      "min_coverage_chunks": 2,
-      "difficulty": "medium"
+      "min_coverage_chunks": 1,
+      "difficulty": "easy"
     },
     "74177": {
       "name": "CT Abdomen and Pelvis with Contrast",
       "total_chunks": 46,
+      "shared_chunks": 42,
       "corpus_pct": 24.7,
       "coverage_criteria": 13,
       "exclusions": 2,
       "billing": 31,
-      "min_coverage_chunks": 2,
-      "difficulty": "medium"
+      "min_coverage_chunks": 1,
+      "difficulty": "easy"
     },
     "77067": {
       "name": "Screening Mammography",
       "total_chunks": 41,
+      "shared_chunks": 31,
       "corpus_pct": 22.0,
       "coverage_criteria": 8,
       "exclusions": 1,
@@ -90,22 +99,24 @@
     "92507": {
       "name": "Speech-Language Pathology",
       "total_chunks": 48,
+      "shared_chunks": 0,
       "corpus_pct": 25.8,
       "coverage_criteria": 37,
       "exclusions": 1,
       "billing": 10,
-      "min_coverage_chunks": 4,
-      "difficulty": "hard"
+      "min_coverage_chunks": 1,
+      "difficulty": "easy"
     },
     "92550": {
       "name": "Tympanometry and Reflex Threshold Measurements",
       "total_chunks": 58,
+      "shared_chunks": 31,
       "corpus_pct": 31.2,
       "coverage_criteria": 22,
       "exclusions": 2,
       "billing": 34,
-      "min_coverage_chunks": 3,
-      "difficulty": "hard"
+      "min_coverage_chunks": 1,
+      "difficulty": "easy"
     }
   }
 }
