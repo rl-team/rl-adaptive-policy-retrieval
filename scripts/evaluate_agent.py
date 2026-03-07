@@ -162,8 +162,9 @@ def parse_args() -> argparse.Namespace:
         description="Evaluate trained offline RL agent vs baselines.",
     )
     parser.add_argument(
-        "--checkpoint", type=str, required=True,
-        help="Path to trained checkpoint (.pt file).",
+        "--checkpoint", type=str, default=None,
+        help="Path to trained checkpoint (.pt file). "
+             "Required unless --baselines-only is set.",
     )
     parser.add_argument(
         "--agent-type", type=str, default="cql",
@@ -174,40 +175,56 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--episodes", type=int, default=50,
                         help="Episodes per policy.")
     parser.add_argument("--seed", type=int, default=42)
-    return parser.parse_args()
+    parser.add_argument(
+        "--baselines-only", action="store_true",
+        help="Skip trained-agent evaluation; run baselines only. "
+             "Does not require --checkpoint.",
+    )
+    args = parser.parse_args()
+    if not args.baselines_only and args.checkpoint is None:
+        parser.error("--checkpoint is required unless --baselines-only is set.")
+    return args
 
 
 def main() -> None:
     args = parse_args()
 
     print("=" * 70)
-    print("  On-Policy Evaluation: Trained Agent vs Baselines")
-    print("=" * 70)
-
-    # -- Load agent --
-    print(f"\n  Checkpoint: {args.checkpoint}")
-    print(f"  Agent type: {args.agent_type.upper()}")
-
-    if args.agent_type == "cql":
-        agent = ConservativeQLAgent.load(args.checkpoint)
-        agent_name = "ConservativeQL"
-        print(f"  Agent loaded (alpha={agent.alpha}, gamma={agent.gamma})")
-    elif args.agent_type == "iql":
-        agent = IQLAgent.load(args.checkpoint)
-        agent_name = "IQL"
-        print(f"  Agent loaded (tau={agent.tau}, beta={agent.beta}, "
-              f"gamma={agent.gamma})")
+    if args.baselines_only:
+        print("  Baseline Evaluation (Fixed-K(3), Fixed-K(5), Heuristic)")
     else:
-        raise ValueError(f"Unknown agent type: {args.agent_type}")
+        print("  On-Policy Evaluation: Trained Agent vs Baselines")
+    print("=" * 70)
 
     print(f"  Episodes per policy: {args.episodes}")
     print(f"  Seed: {args.seed}")
 
-    # -- Define all policies --
-    # Each policy gets a fresh env with the same seed, ensuring identical
-    # request sequences for fair apples-to-apples comparison.
-    policies: List[tuple] = [
-        (agent_name, lambda env: run_trained_agent_episode(env, agent)),
+    # -- Define policies --
+    policies: List[tuple] = []
+
+    if not args.baselines_only:
+        print(f"\n  Checkpoint: {args.checkpoint}")
+        print(f"  Agent type: {args.agent_type.upper()}")
+
+        if args.agent_type == "cql":
+            agent = ConservativeQLAgent.load(args.checkpoint)
+            agent_name = "ConservativeQL"
+            print(f"  Agent loaded (alpha={agent.alpha}, gamma={agent.gamma})")
+        elif args.agent_type == "iql":
+            agent = IQLAgent.load(args.checkpoint)
+            agent_name = "IQL"
+            print(f"  Agent loaded (tau={agent.tau}, beta={agent.beta}, "
+                  f"gamma={agent.gamma})")
+        else:
+            raise ValueError(f"Unknown agent type: {args.agent_type}")
+
+        # Each policy gets a fresh env with the same seed, ensuring identical
+        # request sequences for fair apples-to-apples comparison.
+        policies.append(
+            (agent_name, lambda env: run_trained_agent_episode(env, agent))
+        )
+
+    policies += [
         ("FixedK(k=3)", lambda env, p=FixedKPolicy(k=3): run_baseline_episode(env, p)),
         ("FixedK(k=5)", lambda env, p=FixedKPolicy(k=5): run_baseline_episode(env, p)),
         ("Heuristic(0.8)", lambda env, p=HeuristicPolicy(confidence_threshold=0.8): run_baseline_episode(env, p)),
@@ -231,7 +248,11 @@ def main() -> None:
     print("  " + "-" * 53)
     print(f"  Evaluated in {elapsed:.1f}s")
 
-    # -- Convergence verdict --
+    if args.baselines_only:
+        print("=" * 70)
+        return
+
+    # -- Convergence verdict (only when a trained agent is present) --
     trained = all_metrics[0]
     baseline_accs = [m["accuracy"] for m in all_metrics[1:]]
     best_baseline_acc = max(baseline_accs)
