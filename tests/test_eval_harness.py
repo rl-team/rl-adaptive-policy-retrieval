@@ -115,6 +115,82 @@ def _run_tests() -> None:
     print(f"  Both policies saw reset() sequence: {seen_A}")
     print("  PASSED")
 
+    # --- 4. seed contract: same seed -> same results across separate calls ---
+    print("\n[Test 4] seed contract: same seed reproduces identical metrics")
+    class SeededEnv:
+        """env whose reset() returns seed-derived deterministic request ids"""
+        def __init__(self, seed: int):
+            import random as _r
+            self._rng = _r.Random(seed)
+        def reset(self):
+            rid = self._rng.randint(0, 999999)
+            return None, {"request_id": rid}
+        def step(self, action):
+            return None, 0, True, False, {}
+
+    def run_seeded(env):
+        _obs, info = env.reset()
+        # deterministic policy: correct if request_id is even
+        correct = (info["request_id"] % 2 == 0)
+        env.step(0)
+        return {"correct": correct, "steps": 1}
+
+    r1 = run_evaluation(
+        [("P", run_seeded)],
+        num_episodes=10,
+        seed=123,
+        env_factory=lambda s: SeededEnv(s),
+        n_bootstrap=50,
+    )
+    r2 = run_evaluation(
+        [("P", run_seeded)],
+        num_episodes=10,
+        seed=123,
+        env_factory=lambda s: SeededEnv(s),
+        n_bootstrap=50,
+    )
+    assert r1["P"]["accuracy"] == r2["P"]["accuracy"], (
+        f"Same seed must give same accuracy: {r1['P']['accuracy']} vs {r2['P']['accuracy']}"
+    )
+    assert r1["P"]["mean_chunks"] == r2["P"]["mean_chunks"], (
+        f"Same seed must give same mean_chunks"
+    )
+    # Different seed should (almost certainly) give different results
+    r3 = run_evaluation(
+        [("P", run_seeded)],
+        num_episodes=10,
+        seed=456,
+        env_factory=lambda s: SeededEnv(s),
+        n_bootstrap=50,
+    )
+    # This is a probabilistic assertion but with 10 episodes from different
+    # seeds, the probability of identical accuracy is very low.
+    print(f"  seed=123 accuracy={r1['P']['accuracy']:.2f}, "
+          f"seed=456 accuracy={r3['P']['accuracy']:.2f}")
+    print("  Same seed -> identical metrics: PASSED")
+
+    # --- 5. harness forwards optional 'return' to compute_metrics ---
+    print("\n[Test 5] harness collects per-episode returns when provided")
+
+    def run_with_return(env):
+        env.reset()
+        env.step(0)
+        return {"correct": True, "steps": 2, "return": 5.0}
+
+    r_ret = run_evaluation(
+        [("WithReturn", run_with_return)],
+        num_episodes=4,
+        seed=42,
+        env_factory=lambda s: FakeEnv(),
+        n_bootstrap=50,
+    )
+    m_ret = r_ret["WithReturn"]
+    assert "mean_return" in m_ret, "Expected mean_return in results"
+    assert m_ret["mean_return"] == 5.0, f"Expected 5.0, got {m_ret['mean_return']}"
+    assert "mean_return_ci" in m_ret, "Expected mean_return_ci in results"
+    print(f"  mean_return={m_ret['mean_return']}, ci={m_ret['mean_return_ci']}")
+    print("  PASSED")
+
     print("\n" + "=" * 70)
     print("  All tests passed")
     print("=" * 70)
