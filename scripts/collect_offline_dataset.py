@@ -103,6 +103,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--episodes", type=int, default=200, help="Number of episodes to collect")
     parser.add_argument("--output", type=str, default="data/offline_buffer.pkl", help="Output pickle path")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
+    parser.add_argument("--step-cost", type=float, default=0.1,
+                        help="Reward step cost (lambda). Default 0.1; "
+                             "ablation values: {0.05, 0.1, 0.2}.")
     return parser.parse_args()
 
 
@@ -124,7 +127,7 @@ def collect_dataset() -> None:
         simulator=sim,
         top_k=10,
         max_steps=20,
-        reward_fn=RewardFunction(step_cost=0.1),
+        reward_fn=RewardFunction(step_cost=args.step_cost),
         query_encoder=sim.encode,
     )
 
@@ -147,6 +150,7 @@ def collect_dataset() -> None:
     all_lengths: List[int] = []
 
     print(f"\n  Collecting {args.episodes} episodes using {len(policies)} policies...")
+    print(f"  Step cost (lambda): {args.step_cost}")
 
     total_episodes_done = 0
     for policy_name, policy in policies:
