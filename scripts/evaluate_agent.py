@@ -1,5 +1,5 @@
 """
-Evaluate a trained Conservative Q-Learning agent on-policy and compare
+Evaluate a trained offline RL agent (CQL or IQL) on-policy and compare
 against baselines.
 
 Loads a trained checkpoint, runs the greedy policy in the real environment,
@@ -7,11 +7,11 @@ and reports accuracy, mean steps, and mean return alongside baseline policies.
 This is the primary convergence check after training.
 
 Usage:
-    python -m scripts.evaluate_agent --checkpoint runs/experiment_01/checkpoint.pt
-    python -m scripts.evaluate_agent --checkpoint runs/experiment_01/checkpoint.pt \
-        --episodes 50 --seed 99
+    python -m scripts.evaluate_agent --checkpoint runs/cql_2k/checkpoint.pt
+    python -m scripts.evaluate_agent --checkpoint runs/iql_2k/checkpoint.pt \
+        --agent-type iql --episodes 50 --seed 99
 
-Reference: EDD Use Case 4 (postconditions).
+Reference: EDD Use Case 4 (postconditions), Use Case 9.
 """
 
 from __future__ import annotations
@@ -29,6 +29,7 @@ import numpy as np
 
 from simulator.pa_simulator import PASimulator
 from rl.conservative_ql_agent import ConservativeQLAgent
+from rl.iql_agent import IQLAgent
 from rl.reward import RewardFunction
 
 from baselines.fixed_k import FixedKPolicy
@@ -39,11 +40,11 @@ from baselines.heuristic import HeuristicPolicy
 # Episode runners
 # ---------------------------------------------------------------------------
 
-def run_conservative_ql_episode(
+def run_trained_agent_episode(
     env: PolicyRetrievalEnv,
-    agent: ConservativeQLAgent,
+    agent,
 ) -> Dict[str, object]:
-    """Run one episode with the trained Conservative Q-Learning agent."""
+    """Run one episode with a trained agent (CQL or IQL)."""
     obs, info = env.reset()
     episode_return = 0.0
     steps = 0
@@ -158,11 +159,17 @@ def evaluate_policy(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Evaluate trained Conservative Q-Learning agent vs baselines.",
+        description="Evaluate trained offline RL agent vs baselines.",
     )
     parser.add_argument(
         "--checkpoint", type=str, required=True,
         help="Path to trained checkpoint (.pt file).",
+    )
+    parser.add_argument(
+        "--agent-type", type=str, default="cql",
+        choices=["cql", "iql"],
+        help="Agent type: 'cql' for Conservative Q-Learning, "
+             "'iql' for Implicit Q-Learning (default: cql).",
     )
     parser.add_argument("--episodes", type=int, default=50,
                         help="Episodes per policy.")
@@ -174,13 +181,25 @@ def main() -> None:
     args = parse_args()
 
     print("=" * 70)
-    print("  On-Policy Evaluation: Conservative Q-Learning vs Baselines")
+    print("  On-Policy Evaluation: Trained Agent vs Baselines")
     print("=" * 70)
 
     # -- Load agent --
     print(f"\n  Checkpoint: {args.checkpoint}")
-    agent = ConservativeQLAgent.load(args.checkpoint)
-    print(f"  Agent loaded (alpha={agent.alpha}, gamma={agent.gamma})")
+    print(f"  Agent type: {args.agent_type.upper()}")
+
+    if args.agent_type == "cql":
+        agent = ConservativeQLAgent.load(args.checkpoint)
+        agent_name = "ConservativeQL"
+        print(f"  Agent loaded (alpha={agent.alpha}, gamma={agent.gamma})")
+    elif args.agent_type == "iql":
+        agent = IQLAgent.load(args.checkpoint)
+        agent_name = "IQL"
+        print(f"  Agent loaded (tau={agent.tau}, beta={agent.beta}, "
+              f"gamma={agent.gamma})")
+    else:
+        raise ValueError(f"Unknown agent type: {args.agent_type}")
+
     print(f"  Episodes per policy: {args.episodes}")
     print(f"  Seed: {args.seed}")
 
@@ -188,7 +207,7 @@ def main() -> None:
     # Each policy gets a fresh env with the same seed, ensuring identical
     # request sequences for fair apples-to-apples comparison.
     policies: List[tuple] = [
-        ("ConservativeQL", lambda env: run_conservative_ql_episode(env, agent)),
+        (agent_name, lambda env: run_trained_agent_episode(env, agent)),
         ("FixedK(k=3)", lambda env, p=FixedKPolicy(k=3): run_baseline_episode(env, p)),
         ("FixedK(k=5)", lambda env, p=FixedKPolicy(k=5): run_baseline_episode(env, p)),
         ("Heuristic(0.8)", lambda env, p=HeuristicPolicy(confidence_threshold=0.8): run_baseline_episode(env, p)),
