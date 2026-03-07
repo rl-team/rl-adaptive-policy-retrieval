@@ -5,9 +5,10 @@ By default, reads pre-extracted scalar data from data/sweep_results.json
 (committed to the repo for reproducibility). Use --from-tensorboard to
 regenerate the JSON from raw Tensorboard event files in runs/.
 
-Produces TWO separate figures:
-  1. CQL hyperparameter sweep (alpha/lr) + primary CQL/IQL runs
-  2. Lambda (step_cost) sweep
+Produces THREE separate figures:
+  1. CQL hyperparameter sweep (alpha/lr only, 3 configs)
+  2. Lambda (step_cost) sweep (3 configs)
+  3. Primary agents: CQL 2k and IQL 2k on their native metrics
 
 Usage:
     python -m scripts.plot_training_curves
@@ -16,6 +17,7 @@ Usage:
 Output:
     figures/training_curves_cql_sweep.png/pdf
     figures/training_curves_lambda_sweep.png/pdf
+    figures/training_curves_primary.png/pdf
 """
 
 from __future__ import annotations
@@ -78,13 +80,18 @@ CQL_METRICS = [
     ("q_values/mean", "Mean Q-Value"),
 ]
 
-# CQL sweep group: alpha/lr sweep + primary runs
+IQL_METRICS = [
+    ("loss/v", "Value Loss"),
+    ("loss/q_td", "Q-Network TD Loss"),
+    ("loss/policy", "Policy Loss (AWR)"),
+    ("q_values/mean", "Mean Q-Value"),
+]
+
+# CQL sweep group: alpha/lr sweep ONLY (no primary runs)
 CQL_SWEEP_RUNS = [
     "sweep_alpha0.5_lr1e-3",
     "sweep_alpha1.0_lr3e-4",
     "sweep_alpha0.1_lr3e-4",
-    "cql_2k",
-    "iql_2k",
 ]
 
 # Lambda sweep group
@@ -173,6 +180,18 @@ def smooth(values: list, weight: float = EMA_WEIGHT) -> list:
     return smoothed
 
 
+def deduplicate_by_epoch(steps: list, values: list):
+    """Average duplicate data points at the same epoch."""
+    from collections import defaultdict
+    epoch_vals = defaultdict(list)
+    for s, v in zip(steps, values):
+        epoch_vals[s].append(v)
+    sorted_epochs = sorted(epoch_vals.keys())
+    dedup_steps = sorted_epochs
+    dedup_values = [sum(epoch_vals[e]) / len(epoch_vals[e]) for e in sorted_epochs]
+    return dedup_steps, dedup_values
+
+
 def plot_group(
     all_data: dict,
     run_names: list,
@@ -197,6 +216,7 @@ def plot_group(
             color = COLORS.get(run_name, "#666666")
             label = DISPLAY_LABELS.get(run_name, run_name)
             steps, values = run_data[tag]
+            steps, values = deduplicate_by_epoch(steps, values)
 
             ax.plot(steps, values, color=color, alpha=0.15, linewidth=0.5)
             ax.plot(steps, smooth(values), color=color,
@@ -220,6 +240,67 @@ def plot_group(
 
     png_path = os.path.join(OUTPUT_DIR, f"{filename_base}.png")
     pdf_path = os.path.join(OUTPUT_DIR, f"{filename_base}.pdf")
+    plt.savefig(png_path, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.savefig(pdf_path, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+
+    print(f"  Saved: {png_path}")
+    print(f"  Saved: {pdf_path}")
+
+
+def plot_primary_agents(all_data: dict) -> None:
+    """Plot CQL 2k and IQL 2k side by side, each with their own metrics."""
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    fig, axes = plt.subplots(2, 2, figsize=(10, 7))
+    fig.suptitle("Training Curves: CQL and IQL Primary Runs",
+                 fontsize=13, fontweight="bold", y=0.98)
+
+    cql_color = COLORS["cql_2k"]
+    iql_color = COLORS["iql_2k"]
+
+    # Left column: CQL 2k
+    cql_panels = [
+        ("loss/total", "CQL: Total Loss"),
+        ("loss/td", "CQL: TD Loss"),
+    ]
+    for row, (tag, title) in enumerate(cql_panels):
+        ax = axes[row, 0]
+        if "cql_2k" in all_data and tag in all_data["cql_2k"]:
+            steps, values = all_data["cql_2k"][tag]
+            steps, values = deduplicate_by_epoch(steps, values)
+            ax.plot(steps, values, color=cql_color, alpha=0.15, linewidth=0.5)
+            ax.plot(steps, smooth(values), color=cql_color, linewidth=1.8,
+                    label="CQL (2k corpus)")
+        ax.set_title(title, fontsize=11)
+        ax.set_xlabel("Epoch", fontsize=9)
+        ax.grid(True, alpha=0.3)
+        ax.tick_params(labelsize=8)
+        ax.legend(fontsize=8, loc="upper right")
+
+    # Right column: IQL 2k
+    iql_panels = [
+        ("loss/q_td", "IQL: Q-Network TD Loss"),
+        ("loss/policy", "IQL: Policy Loss (AWR)"),
+    ]
+    for row, (tag, title) in enumerate(iql_panels):
+        ax = axes[row, 1]
+        if "iql_2k" in all_data and tag in all_data["iql_2k"]:
+            steps, values = all_data["iql_2k"][tag]
+            steps, values = deduplicate_by_epoch(steps, values)
+            ax.plot(steps, values, color=iql_color, alpha=0.15, linewidth=0.5)
+            ax.plot(steps, smooth(values), color=iql_color, linewidth=1.8,
+                    label="IQL (2k corpus)")
+        ax.set_title(title, fontsize=11)
+        ax.set_xlabel("Epoch", fontsize=9)
+        ax.grid(True, alpha=0.3)
+        ax.tick_params(labelsize=8)
+        ax.legend(fontsize=8, loc="upper right")
+
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+
+    png_path = os.path.join(OUTPUT_DIR, "training_curves_primary.png")
+    pdf_path = os.path.join(OUTPUT_DIR, "training_curves_primary.pdf")
     plt.savefig(png_path, dpi=300, bbox_inches="tight", facecolor="white")
     plt.savefig(pdf_path, bbox_inches="tight", facecolor="white")
     plt.close(fig)
@@ -273,6 +354,11 @@ def main() -> None:
         title=r"Training Curves: Step Cost ($\lambda$) Sweep",
         filename_base="training_curves_lambda_sweep",
     )
+
+    # Primary agents: CQL 2k on CQL metrics, IQL 2k on IQL metrics
+    # Plotted side by side (2 columns, 4 rows) so each agent has its own panels
+    print("\n  --- Primary Agents (CQL 2k + IQL 2k) ---")
+    plot_primary_agents(all_data)
 
     print("\n  Done.")
 
