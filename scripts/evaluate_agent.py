@@ -10,6 +10,9 @@ Usage:
     python -m scripts.evaluate_agent --checkpoint runs/cql_2k/checkpoint.pt
     python -m scripts.evaluate_agent --checkpoint runs/iql_2k/checkpoint.pt \
         --agent-type iql --episodes 50 --seed 99
+    python -m scripts.evaluate_agent --baselines-only --episodes 50
+    python -m scripts.evaluate_agent --checkpoint runs/cql_2k/checkpoint.pt \
+        --output-json /tmp/eval_results.json
 
 Reference: EDD Use Case 4 (postconditions), Use Case 9.
 """
@@ -22,8 +25,10 @@ with contextlib.redirect_stderr(io.StringIO()):
     from rl.env import PolicyRetrievalEnv
 
 import argparse
+import json
+import os
 import time
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 
@@ -48,6 +53,7 @@ def run_trained_agent_episode(
     obs, info = env.reset()
     episode_return = 0.0
     steps = 0
+    procedure_code = info.get("procedure_code", "N/A")
 
     while True:
         candidates = env.candidates
@@ -61,6 +67,9 @@ def run_trained_agent_episode(
         if terminated:
             break
 
+    # Collect chunk_ids from retrieved chunks
+    chunk_ids = [c.chunk_id for c in env.retrieved_chunks]
+
     return {
         "return": episode_return,
         "steps": steps,
@@ -68,6 +77,8 @@ def run_trained_agent_episode(
         "decision": step_info.get("decision", "N/A"),
         "ground_truth": step_info.get("ground_truth", "N/A"),
         "forced_stop": step_info.get("forced_stop", False),
+        "chunk_ids": chunk_ids,
+        "procedure_code": procedure_code,
     }
 
 
@@ -76,10 +87,11 @@ def run_baseline_episode(
     policy,
 ) -> Dict[str, object]:
     """Run one episode with a baseline policy."""
-    obs, _info = env.reset()
+    obs, info = env.reset()
     policy.reset()
     episode_return = 0.0
     steps = 0
+    procedure_code = info.get("procedure_code", "N/A")
 
     while True:
         candidates = env.candidates
@@ -103,6 +115,9 @@ def run_baseline_episode(
         if terminated:
             break
 
+    # Collect chunk_ids from retrieved chunks
+    chunk_ids = [c.chunk_id for c in env.retrieved_chunks]
+
     return {
         "return": episode_return,
         "steps": steps,
@@ -110,6 +125,8 @@ def run_baseline_episode(
         "decision": step_info.get("decision", "N/A"),
         "ground_truth": step_info.get("ground_truth", "N/A"),
         "forced_stop": step_info.get("forced_stop", False),
+        "chunk_ids": chunk_ids,
+        "procedure_code": procedure_code,
     }
 
 
@@ -122,27 +139,55 @@ def evaluate_policy(
     runner,
     num_episodes: int,
     seed: int,
-) -> Dict[str, float]:
+    step_cost: float = 0.1,
+) -> Dict[str, object]:
     """Run a policy for N episodes and aggregate metrics.
 
     Creates a fresh environment with the given seed so that each policy
     sees the exact same sequence of PA requests (fair comparison).
+
+    Parameters
+    ----------
+    name : str
+        Display name for the policy.
+    runner : callable
+        Function that takes an env and returns per-episode result dict.
+    num_episodes : int
+        Number of episodes to evaluate.
+    seed : int
+        Random seed for the PA simulator.
+    step_cost : float
+        Step cost (lambda) for the RewardFunction. Default 0.1.
+
+    Returns
+    -------
+    dict with aggregate metrics and per-episode results.
     """
     sim = PASimulator(seed=seed)
     env = PolicyRetrievalEnv(
         simulator=sim,
         top_k=10,
         max_steps=20,
-        reward_fn=RewardFunction(step_cost=0.1),
+        reward_fn=RewardFunction(step_cost=step_cost),
         query_encoder=sim.encode,
     )
 
+    episodes_data = []
     all_returns, all_steps, all_correct = [], [], []
     for _ep in range(num_episodes):
         result = runner(env)
         all_returns.append(result["return"])
         all_steps.append(result["steps"])
         all_correct.append(result["correct"])
+        episodes_data.append({
+            "return": float(result["return"]),
+            "steps": int(result["steps"]),
+            "correct": bool(result["correct"]),
+            "decision": str(result.get("decision", "N/A")),
+            "ground_truth": str(result.get("ground_truth", "N/A")),
+            "chunk_ids": result.get("chunk_ids", []),
+            "procedure_code": result.get("procedure_code", "N/A"),
+        })
 
     return {
         "name": name,
@@ -150,6 +195,7 @@ def evaluate_policy(
         "mean_return": float(np.mean(all_returns)),
         "std_return": float(np.std(all_returns)),
         "mean_steps": float(np.mean(all_steps)),
+        "episodes": episodes_data,
     }
 
 
@@ -176,6 +222,10 @@ def parse_args() -> argparse.Namespace:
                         help="Episodes per policy.")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
+        "--output-json", type=str, default=None,
+        help="Path to save per-episode results as JSON.",
+    )
+    parser.add_argument(
         "--baselines-only", action="store_true",
         help="Skip trained-agent evaluation; run baselines only. "
              "Does not require --checkpoint.",
@@ -196,13 +246,11 @@ def main() -> None:
         print("  On-Policy Evaluation: Trained Agent vs Baselines")
     print("=" * 70)
 
-    print(f"  Episodes per policy: {args.episodes}")
-    print(f"  Seed: {args.seed}")
-
-    # -- Define policies --
+    # -- Define all policies --
     policies: List[tuple] = []
 
     if not args.baselines_only:
+        # -- Load agent --
         print(f"\n  Checkpoint: {args.checkpoint}")
         print(f"  Agent type: {args.agent_type.upper()}")
 
@@ -218,17 +266,29 @@ def main() -> None:
         else:
             raise ValueError(f"Unknown agent type: {args.agent_type}")
 
-        # Each policy gets a fresh env with the same seed, ensuring identical
-        # request sequences for fair apples-to-apples comparison.
         policies.append(
-            (agent_name, lambda env: run_trained_agent_episode(env, agent))
+            (agent_name, lambda env, _a=agent: run_trained_agent_episode(env, _a))
         )
 
-    policies += [
+    print(f"  Episodes per policy: {args.episodes}")
+    print(f"  Seed: {args.seed}")
+
+    # Baselines
+    policies.extend([
         ("FixedK(k=3)", lambda env, p=FixedKPolicy(k=3): run_baseline_episode(env, p)),
         ("FixedK(k=5)", lambda env, p=FixedKPolicy(k=5): run_baseline_episode(env, p)),
         ("Heuristic(0.8)", lambda env, p=HeuristicPolicy(confidence_threshold=0.8): run_baseline_episode(env, p)),
-    ]
+    ])
+
+    # Add BC if checkpoint exists
+    bc_checkpoint = "runs/bc_2k/checkpoint.pt"
+    if os.path.exists(bc_checkpoint):
+        from baselines.bc import BehavioralCloningPolicy
+        bc_policy = BehavioralCloningPolicy.load(bc_checkpoint)
+        policies.append(
+            ("BC", lambda env, p=bc_policy: run_baseline_episode(env, p))
+        )
+        print(f"  BC checkpoint found: {bc_checkpoint}")
 
     # -- Evaluate all policies --
     print(f"\n  {'Policy':<23} {'Accuracy':>8}  {'Return':>12}  {'Steps':>5}")
@@ -248,50 +308,61 @@ def main() -> None:
     print("  " + "-" * 53)
     print(f"  Evaluated in {elapsed:.1f}s")
 
-    if args.baselines_only:
-        print("=" * 70)
-        return
+    # -- Save JSON output if requested --
+    if args.output_json:
+        output = {}
+        for m in all_metrics:
+            output[m["name"]] = {
+                "accuracy": m["accuracy"],
+                "mean_return": m["mean_return"],
+                "std_return": m["std_return"],
+                "mean_steps": m["mean_steps"],
+                "episodes": m["episodes"],
+            }
+        os.makedirs(os.path.dirname(os.path.abspath(args.output_json)), exist_ok=True)
+        with open(args.output_json, "w") as f:
+            json.dump(output, f, indent=2)
+        print(f"\n  Results saved to: {args.output_json}")
 
-    # -- Convergence verdict (only when a trained agent is present) --
-    trained = all_metrics[0]
-    baseline_accs = [m["accuracy"] for m in all_metrics[1:]]
-    best_baseline_acc = max(baseline_accs)
-    best_baseline_name = all_metrics[1 + baseline_accs.index(best_baseline_acc)]["name"]
+    # -- Convergence verdict --
+    if not args.baselines_only and len(all_metrics) > 1:
+        trained = all_metrics[0]
+        baseline_accs = [m["accuracy"] for m in all_metrics[1:]]
+        best_baseline_acc = max(baseline_accs)
+        best_baseline_name = all_metrics[1 + baseline_accs.index(best_baseline_acc)]["name"]
 
-    print("\n" + "=" * 70)
-    print("  Convergence Analysis")
-    print("-" * 70)
+        print("\n" + "=" * 70)
+        print("  Convergence Analysis")
+        print("-" * 70)
 
-    if trained["accuracy"] > best_baseline_acc:
-        print(f"  Trained agent accuracy ({trained['accuracy']:.1%}) > best baseline "
-              f"({best_baseline_name}: {best_baseline_acc:.1%})")
-        print("  Verdict: Training converged. Agent outperforms baselines.")
-    elif trained["accuracy"] == best_baseline_acc:
-        print(f"  Trained agent accuracy ({trained['accuracy']:.1%}) = best baseline "
-              f"({best_baseline_name}: {best_baseline_acc:.1%})")
-        # Check if the trained agent achieves a higher return (same accuracy
-        # with fewer steps means better efficiency)
-        best_idx = 1 + baseline_accs.index(best_baseline_acc)
-        if trained["mean_return"] > all_metrics[best_idx]["mean_return"]:
-            print(f"  Trained return ({trained['mean_return']:.2f}) > baseline "
-                  f"({all_metrics[best_idx]['mean_return']:.2f})")
-            print("  Verdict: Same accuracy, higher return. Training converged.")
-        elif abs(trained["mean_return"] - all_metrics[best_idx]["mean_return"]) < 0.05:
-            print(f"  Trained return ({trained['mean_return']:.2f}) ~ baseline "
-                  f"({all_metrics[best_idx]['mean_return']:.2f})")
-            print("  Verdict: Agent matches best baseline. Training converged,")
-            print("           but learned the same strategy as FixedK.")
+        if trained["accuracy"] > best_baseline_acc:
+            print(f"  Trained agent accuracy ({trained['accuracy']:.1%}) > best baseline "
+                  f"({best_baseline_name}: {best_baseline_acc:.1%})")
+            print("  Verdict: Training converged. Agent outperforms baselines.")
+        elif trained["accuracy"] == best_baseline_acc:
+            print(f"  Trained agent accuracy ({trained['accuracy']:.1%}) = best baseline "
+                  f"({best_baseline_name}: {best_baseline_acc:.1%})")
+            best_idx = 1 + baseline_accs.index(best_baseline_acc)
+            if trained["mean_return"] > all_metrics[best_idx]["mean_return"]:
+                print(f"  Trained return ({trained['mean_return']:.2f}) > baseline "
+                      f"({all_metrics[best_idx]['mean_return']:.2f})")
+                print("  Verdict: Same accuracy, higher return. Training converged.")
+            elif abs(trained["mean_return"] - all_metrics[best_idx]["mean_return"]) < 0.05:
+                print(f"  Trained return ({trained['mean_return']:.2f}) ~ baseline "
+                      f"({all_metrics[best_idx]['mean_return']:.2f})")
+                print("  Verdict: Agent matches best baseline. Training converged,")
+                print("           but learned the same strategy as FixedK.")
+            else:
+                print("  Verdict: Same accuracy but lower efficiency. Consider")
+                print("           retraining with different alpha or more epochs.")
         else:
-            print("  Verdict: Same accuracy but lower efficiency. Consider")
-            print("           retraining with different alpha or more epochs.")
-    else:
-        print(f"  Trained agent accuracy ({trained['accuracy']:.1%}) < best baseline "
-              f"({best_baseline_name}: {best_baseline_acc:.1%})")
-        print("  Verdict: Agent underperforms. Retrain needed.")
-        print("  Suggestions (per EDD Use Case 4, Alt flows):")
-        print("    1. Reduce alpha (too conservative): --alpha 0.1")
-        print("    2. Increase epochs: --epochs 500")
-        print("    3. Increase learning rate: --lr 1e-3")
+            print(f"  Trained agent accuracy ({trained['accuracy']:.1%}) < best baseline "
+                  f"({best_baseline_name}: {best_baseline_acc:.1%})")
+            print("  Verdict: Agent underperforms. Retrain needed.")
+            print("  Suggestions (per EDD Use Case 4, Alt flows):")
+            print("    1. Reduce alpha (too conservative): --alpha 0.1")
+            print("    2. Increase epochs: --epochs 500")
+            print("    3. Increase learning rate: --lr 1e-3")
 
     print("=" * 70)
 

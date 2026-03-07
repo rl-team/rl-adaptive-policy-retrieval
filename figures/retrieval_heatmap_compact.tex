@@ -1,0 +1,42 @@
+% R43: Compact Retrieval Heatmap — Procedure-Level Aggregation
+% Usage: \input{figures/retrieval_heatmap_compact.tex} inside a figure environment
+% Requires: \usepackage{pgfplots}, \usepackage{pgfplotstable}, \pgfplotsset{compat=1.18}
+% Note: For data-driven heatmaps, the matplotlib PNG/PDF version is recommended.
+% This TikZ version provides a manually-encoded table for maximum control.
+
+\definecolor{heat0}{RGB}{255,255,204}
+\definecolor{heat1}{RGB}{254,217,142}
+\definecolor{heat2}{RGB}{254,153,41}
+\definecolor{heat3}{RGB}{217,72,1}
+\definecolor{heat4}{RGB}{140,45,4}
+
+\newcommand{\hcell}[1]{%
+  \ifdim #1pt < 0.5pt \cellcolor{heat0}\else
+  \ifdim #1pt < 1.5pt \cellcolor{heat1}\else
+  \ifdim #1pt < 3.0pt \cellcolor{heat2}\else
+  \ifdim #1pt < 5.0pt \cellcolor{heat3}\else
+                       \cellcolor{heat4}\fi\fi\fi\fi
+  \textbf{\scriptsize #1}%
+}
+
+\begin{tikzpicture}
+\node[inner sep=0pt] {
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{l|cccccc}
+\textbf{Procedure} & \textbf{CQL} & \textbf{IQL} & \textbf{BC} & \textbf{FK(3)} & \textbf{FK(5)} & \textbf{Heur.} \\
+\hline
+45378 (17 ch.) & \hcell{2.2} & \hcell{0.2} & \hcell{2.2} & \hcell{0.3} & \hcell{0.5} & \hcell{0.2} \\
+70450 (25 ch.) & \hcell{5.2} & \hcell{0.6} & \hcell{5.2} & \hcell{0.7} & \hcell{1.2} & \hcell{0.7} \\
+70486 (7 ch.)  & \hcell{0.5} & \hcell{0.1} & \hcell{0.5} & \hcell{0.1} & \hcell{0.2} & \hcell{0.1} \\
+70553 (4 ch.)  & \hcell{0.1} & \hcell{0.0} & \hcell{0.1} & \hcell{0.0} & \hcell{0.0} & \hcell{0.0} \\
+71260 (10 ch.) & \hcell{0.3} & \hcell{0.0} & \hcell{0.3} & \hcell{0.0} & \hcell{0.0} & \hcell{0.0} \\
+72148 (27 ch.) & \hcell{7.1} & \hcell{0.7} & \hcell{7.1} & \hcell{1.0} & \hcell{1.7} & \hcell{0.8} \\
+74177 (3 ch.)  & \hcell{0.3} & \hcell{0.0} & \hcell{0.3} & \hcell{0.0} & \hcell{0.0} & \hcell{0.0} \\
+77067 (11 ch.) & \hcell{1.8} & \hcell{0.3} & \hcell{1.8} & \hcell{0.4} & \hcell{0.7} & \hcell{0.3} \\
+92507 (13 ch.) & \hcell{0.9} & \hcell{0.0} & \hcell{0.9} & \hcell{0.0} & \hcell{0.1} & \hcell{0.0} \\
+92550 (14 ch.) & \hcell{1.6} & \hcell{0.3} & \hcell{1.6} & \hcell{0.4} & \hcell{0.5} & \hcell{0.3} \\
+\end{tabular}
+};
+\end{tikzpicture}

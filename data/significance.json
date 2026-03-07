@@ -1,0 +1,62 @@
+{
+  "iql": {
+    "comparison": "CQL vs IQL",
+    "cql_accuracy": 0.92,
+    "baseline_accuracy": 0.625,
+    "accuracy_diff": 0.29500000000000004,
+    "t_statistic": 9.125212520599138,
+    "p_value": 8.069637861818585e-17,
+    "significant_at_005": true,
+    "bootstrap_mean_diff": 0.2952875,
+    "bootstrap_ci_lower": 0.235,
+    "bootstrap_ci_upper": 0.36
+  },
+  "bc": {
+    "comparison": "CQL vs BC",
+    "cql_accuracy": 0.92,
+    "baseline_accuracy": 0.92,
+    "accuracy_diff": 0.0,
+    "t_statistic": NaN,
+    "p_value": NaN,
+    "significant_at_005": false,
+    "bootstrap_mean_diff": 0.0,
+    "bootstrap_ci_lower": 0.0,
+    "bootstrap_ci_upper": 0.0
+  },
+  "fixed_k_3": {
+    "comparison": "CQL vs FixedK(k=3)",
+    "cql_accuracy": 0.92,
+    "baseline_accuracy": 0.54,
+    "accuracy_diff": 0.38,
+    "t_statistic": 11.043900666679498,
+    "p_value": 2.0025898183784572e-22,
+    "significant_at_005": true,
+    "bootstrap_mean_diff": 0.38028199999999995,
+    "bootstrap_ci_lower": 0.31500000000000006,
+    "bootstrap_ci_upper": 0.44999999999999996
+  },
+  "fixed_k_5": {
+    "comparison": "CQL vs FixedK(k=5)",
+    "cql_accuracy": 0.92,
+    "baseline_accuracy": 0.62,
+    "accuracy_diff": 0.30000000000000004,
+    "t_statistic": 9.235026490796566,
+    "p_value": 3.9423737730539164e-17,
+    "significant_at_005": true,
+    "bootstrap_mean_diff": 0.30040550000000005,
+    "bootstrap_ci_lower": 0.2350000000000001,
+    "bootstrap_ci_upper": 0.365
+  },
+  "heuristic": {
+    "comparison": "CQL vs Heuristic(0.8)",
+    "cql_accuracy": 0.92,
+    "baseline_accuracy": 0.51,
+    "accuracy_diff": 0.41000000000000003,
+    "t_statistic": 11.75959759486779,
+    "p_value": 1.3876983913173673e-24,
+    "significant_at_005": true,
+    "bootstrap_mean_diff": 0.41039799999999993,
+    "bootstrap_ci_lower": 0.3400000000000001,
+    "bootstrap_ci_upper": 0.48
+  }
+}
