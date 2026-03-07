@@ -144,12 +144,15 @@ class BehavioralCloningPolicy(BaselinePolicy):
         state : np.ndarray
             Observation vector of shape (state_dim,).
         candidates : list of int
-            Valid candidate indices (may exclude already-retrieved chunks).
+            Valid candidate **corpus indices**.  Internally, the network
+            outputs logits over relative action indices (0..K-1), so we
+            mask logits to the first ``len(candidates)`` positions and
+            return the corresponding corpus index.
 
         Returns
         -------
         int
-            Chosen candidate index, or -1 if no candidates are available.
+            Chosen candidate corpus index, or -1 if no candidates.
         """
         if not candidates:
             return -1
@@ -160,12 +163,17 @@ class BehavioralCloningPolicy(BaselinePolicy):
             )
             logits = self._network(state_t)  # (num_actions,)
 
-        # Mask to valid candidates
+        # Mask to valid relative action indices (0..len(candidates)-1)
         mask = torch.full_like(logits, float("-inf"))
-        for c in candidates:
-            mask[c] = logits[c]
+        for i in range(min(len(candidates), self.num_actions - 1)):
+            mask[i] = logits[i]
 
-        return int(mask.argmax().item())
+        best_action = int(mask.argmax().item())
+
+        # Map relative action index back to absolute corpus index
+        if best_action < len(candidates):
+            return candidates[best_action]
+        return -1
 
     def should_stop(self, state, history: List[PolicyChunk]) -> bool:
         """Decide whether to stop by comparing stop vs best-continue.
@@ -191,8 +199,9 @@ class BehavioralCloningPolicy(BaselinePolicy):
     ) -> float:
         """Return π(action | state) for importance-weighting.
 
-        Computes a softmax over valid candidates + stop action, then
-        returns the probability of the requested action.
+        ``action`` is a relative action index (0..K-1 for retrieval, or
+        the stop action index).  Computes a softmax over valid action
+        indices + stop, then returns the probability of ``action``.
         """
         with torch.no_grad():
             state_t = torch.tensor(
@@ -200,8 +209,9 @@ class BehavioralCloningPolicy(BaselinePolicy):
             )
             logits = self._network(state_t)
 
-        # Build valid action set: candidates + stop
-        valid = list(candidates) + [self._stop_action]
+        # Build valid action set: relative indices 0..len(candidates)-1 + stop
+        n_cands = min(len(candidates), self.num_actions - 1)
+        valid = list(range(n_cands)) + [self._stop_action]
         mask = torch.full_like(logits, float("-inf"))
         for a in valid:
             mask[a] = logits[a]
