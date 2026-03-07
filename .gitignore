@@ -24,6 +24,9 @@ Thumbs.db
 # Data artifacts (generated locally)
 *.npy
 *.pkl
+# Exception: artifacts generated for M29, M30
+!data/offline_buffer_2k.pkl
+!data/test_set_200.pkl
 
 # Tensorboard logs
 runs/
