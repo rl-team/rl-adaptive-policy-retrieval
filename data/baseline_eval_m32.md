@@ -1,8 +1,8 @@
 # Baseline Evaluation for M32
 
-**Script:** `scripts/evaluate_agent.py --baselines-only --episodes 200 --seed 99`  
-**Test set:** `data/test_set_200.pkl` (seed=99, 200 episodes)  
-**Date:** 2026-03-07
+**Script:** `scripts/evaluate_agent.py --baselines-only --episodes 200 --seed 99`
+**Evaluation:** Runs 200 fresh episodes per baseline using PASimulator(seed=99)
+**Date:** 2026-03-06
 
 ---
 

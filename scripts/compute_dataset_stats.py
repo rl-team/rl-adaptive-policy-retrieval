@@ -24,29 +24,11 @@ from baselines.heuristic import HeuristicPolicy
 from rl.conservative_ql_agent import ReplayBuffer
 from rl.env import PolicyRetrievalEnv
 from rl.reward import RewardFunction
-from scripts.collect_offline_dataset import run_baseline_episode
 from simulator.pa_simulator import PASimulator
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-
-def reconstruct_episodes(buf: ReplayBuffer) -> List[Dict]:
-    """Split a flat ReplayBuffer into per-episode dicts using done flags."""
-    episodes = []
-    ep_rewards: List[float] = []
-    ep_length = 0
-
-    for r, done in zip(buf._rewards, buf._dones):
-        ep_rewards.append(r)
-        ep_length += 1
-        if done:
-            episodes.append({"length": ep_length, "return": sum(ep_rewards)})
-            ep_rewards = []
-            ep_length = 0
-
-    return episodes
 
 
 def build_policies(seed: int) -> List[Tuple[str, object]]:
@@ -136,7 +118,6 @@ def compute_stats(
     test_buf:   ReplayBuffer,
 ) -> str:
     lines: List[str] = []
-    sep = "---"
 
     # -----------------------------------------------------------------------
     # 1. Total transitions
@@ -220,12 +201,6 @@ def compute_stats(
         for ep in meta:
             counts[ep["decision"]] += 1
         return counts
-
-    def fmt_counts(counts: Dict[str, int], total: int) -> str:
-        return ", ".join(
-            f"{k}: {v} ({100*v/total:.1f}%)"
-            for k, v in sorted(counts.items())
-        )
 
     train_d = decision_counts(train_meta)
     test_d = decision_counts(test_meta)
