@@ -34,8 +34,14 @@ def run_evaluation(
     policies : list of (name, run_episode_fn)
         run_episode_fn(env) runs one episode and returns a dict with at least:
         "correct" (bool), "steps" (int = number of chunks retrieved).
-        run_episode is responsible for calling env.reset() at the start of
-        each episode (harness does not reset before the episode loop).
+        Optionally may include "return" (float) for per-episode return tracking.
+
+        Reset contract: each ``run_episode_fn`` **must** call ``env.reset()``
+        at the start of every episode.  The harness intentionally does *not*
+        call reset on behalf of the policy so that the policy can inspect the
+        observation and info dict returned by reset (e.g. to read the
+        request_id).  Forgetting to call reset will silently re-use the
+        previous episode's terminal state and produce wrong results.
     num_episodes : int
         number of episodes per policy
     seed : int
@@ -60,17 +66,21 @@ def run_evaluation(
         env = env_factory(seed)
         correct: List[bool] = []
         chunks_per_episode: List[int] = []
+        returns: List[float] = []
 
         for _ in range(num_episodes):
             outcome = run_episode(env)
             correct.append(outcome["correct"])
             chunks_per_episode.append(outcome["steps"])
+            if "return" in outcome:
+                returns.append(outcome["return"])
 
         results[name] = compute_metrics(
             correct,
             chunks_per_episode,
             alpha=alpha,
             n_bootstrap=n_bootstrap,
+            returns_per_episode=returns if returns else None,
         )
 
     return results

@@ -91,6 +91,53 @@ def _run_tests() -> None:
     print(f"  mean_chunks = {out['mean_chunks']}, cost_adjusted_utility = {out['cost_adjusted_utility']:.2f}")
     print("  PASSED")
 
+    # --- 7. compute_metrics with returns_per_episode ---
+    print("\n[Test 7] compute_metrics: returns_per_episode -> mean_return + CI")
+    correct_r = [True] * 5
+    chunks_r = [2] * 5
+    returns_r = [10.0, 8.0, 12.0, 9.0, 11.0]
+    out_r = compute_metrics(
+        correct_r, chunks_r, alpha=0.1, n_bootstrap=100,
+        returns_per_episode=returns_r,
+    )
+    expected_mean_return = 10.0
+    assert abs(out_r["mean_return"] - expected_mean_return) < 1e-9, (
+        f"Expected mean_return={expected_mean_return}, got {out_r['mean_return']}"
+    )
+    assert isinstance(out_r["mean_return_ci"], tuple), "mean_return_ci should be tuple"
+    assert len(out_r["mean_return_ci"]) == 2, "mean_return_ci should be (lower, upper)"
+    assert out_r["mean_return_ci"][0] <= expected_mean_return <= out_r["mean_return_ci"][1], (
+        f"mean_return should be within CI: {out_r['mean_return_ci']}"
+    )
+    assert out_r["returns_per_episode"] == returns_r, (
+        "returns_per_episode should be echoed back in output"
+    )
+    print(f"  mean_return = {out_r['mean_return']:.2f}, ci = {out_r['mean_return_ci']}")
+    print("  PASSED")
+
+    # --- 8. compute_metrics without returns_per_episode (backward compat) ---
+    print("\n[Test 8] compute_metrics: no returns_per_episode -> no mean_return key")
+    out_no_ret = compute_metrics(
+        [True, False], [3, 4], alpha=0.1, n_bootstrap=50,
+    )
+    assert "mean_return" not in out_no_ret, (
+        "mean_return should not be present when returns_per_episode is None"
+    )
+    print("  No returns_per_episode -> mean_return absent: correct")
+    print("  PASSED")
+
+    # --- 9. compute_metrics: returns_per_episode length mismatch raises ---
+    print("\n[Test 9] compute_metrics: returns_per_episode length mismatch raises")
+    try:
+        compute_metrics(
+            [True, False], [3, 4], returns_per_episode=[1.0],  # wrong length
+        )
+        assert False, "Should have raised ValueError"
+    except ValueError:
+        pass
+    print("  ValueError raised on length mismatch: correct")
+    print("  PASSED")
+
     print("\n" + "=" * 70)
     print("  All tests passed")
     print("=" * 70)
