@@ -146,6 +146,7 @@ def compute_metrics(
     n_bootstrap: int = 1000,
     retrieved_per_episode: Optional[List[List[int]]] = None,
     relevant_per_episode: Optional[List[List[int]]] = None,
+    returns_per_episode: Optional[List[float]] = None,
 ) -> Dict[str, float | Tuple[float, float]]:
     """compute all metrics with bootstrap 95% CIs
 
@@ -154,6 +155,8 @@ def compute_metrics(
     - mean_chunks, mean_chunks_ci
     - cost_adjusted_utility, cost_adjusted_utility_ci
     - n_episodes
+    - returns_per_episode (raw list, only if provided)
+    - mean_return, mean_return_ci (only if returns_per_episode provided)
     - precision_at_k, precision_at_k_ci (only if relevance data provided)
     """
     n = len(correct)
@@ -180,6 +183,16 @@ def compute_metrics(
         "cost_adjusted_utility_ci": cau_ci,
         "n_episodes": n,
     }
+
+    if returns_per_episode is not None:
+        if len(returns_per_episode) != n:
+            raise ValueError(
+                "returns_per_episode must have same length as correct"
+            )
+        returns_arr = np.array(returns_per_episode, dtype=float)
+        out["returns_per_episode"] = list(returns_per_episode)
+        out["mean_return"] = float(np.mean(returns_arr))
+        out["mean_return_ci"] = bootstrap_ci(returns_arr, "mean", n_bootstrap)
 
     if retrieved_per_episode is not None and relevant_per_episode is not None:
         prec = precision_at_k(retrieved_per_episode, relevant_per_episode)
