@@ -1,0 +1,67 @@
+% R44: Lambda Ablation — CQL Performance Across Step Cost Values
+% Usage: \input{figures/lambda_ablation.tex} inside a figure environment
+% Requires: \usepackage{pgfplots} and \pgfplotsset{compat=1.18}
+
+\definecolor{lam005}{RGB}{52,152,219}  % blue
+\definecolor{lam010}{RGB}{46,204,113}  % green
+\definecolor{lam020}{RGB}{231,76,60}   % red
+
+\begin{tikzpicture}
+\begin{groupplot}[
+    group style={
+        group size=3 by 1,
+        horizontal sep=1.2cm,
+    },
+    width=0.32\textwidth,
+    height=5cm,
+    ybar,
+    bar width=14pt,
+    enlarge x limits=0.4,
+    symbolic x coords={0.05, 0.1, 0.2},
+    xtick=data,
+    nodes near coords,
+    every node near coord/.append style={font=\scriptsize\bfseries},
+    tick label style={font=\footnotesize},
+    label style={font=\small},
+    title style={font=\small\bfseries},
+    xlabel={Step Cost ($\lambda$)},
+    xlabel style={font=\small},
+    ymajorgrids=true,
+    grid style={gray!30},
+]
+
+% --- Accuracy ---
+\nextgroupplot[
+    title={Accuracy},
+    ylabel={Accuracy (\%)},
+    ymin=0, ymax=110,
+    point meta=explicit symbolic,
+]
+\addplot[fill=lam005, draw=white] coordinates {(0.05, 92.0) [92.0\%]};
+\addplot[fill=lam010, draw=white] coordinates {(0.1, 92.0) [92.0\%]};
+\addplot[fill=lam020, draw=white] coordinates {(0.2, 91.5) [91.5\%]};
+
+% --- Mean Steps ---
+\nextgroupplot[
+    title={Mean Steps},
+    ylabel={Mean Steps},
+    ymin=0, ymax=24,
+    point meta=explicit symbolic,
+]
+\addplot[fill=lam005, draw=white] coordinates {(0.05, 20.0) [20.0]};
+\addplot[fill=lam010, draw=white] coordinates {(0.1, 20.0) [20.0]};
+\addplot[fill=lam020, draw=white] coordinates {(0.2, 14.9) [14.9]};
+
+% --- Mean Return ---
+\nextgroupplot[
+    title={Mean Return},
+    ylabel={Mean Return},
+    ymin=-2.5, ymax=0.2,
+    point meta=explicit symbolic,
+]
+\addplot[fill=lam005, draw=white] coordinates {(0.05, -0.11) [{$-$0.11}]};
+\addplot[fill=lam010, draw=white] coordinates {(0.1, -1.06) [{$-$1.06}]};
+\addplot[fill=lam020, draw=white] coordinates {(0.2, -1.96) [{$-$1.96}]};
+
+\end{groupplot}
+\end{tikzpicture}

@@ -5,13 +5,17 @@ By default, reads pre-extracted scalar data from data/sweep_results.json
 (committed to the repo for reproducibility). Use --from-tensorboard to
 regenerate the JSON from raw Tensorboard event files in runs/.
 
+Produces TWO separate figures:
+  1. CQL hyperparameter sweep (alpha/lr) + primary CQL/IQL runs
+  2. Lambda (step_cost) sweep
+
 Usage:
     python -m scripts.plot_training_curves
     python -m scripts.plot_training_curves --from-tensorboard
 
 Output:
-    figures/training_curves.png (300 DPI)
-    figures/training_curves.pdf (vector)
+    figures/training_curves_cql_sweep.png/pdf
+    figures/training_curves_lambda_sweep.png/pdf
 """
 
 from __future__ import annotations
@@ -29,38 +33,70 @@ import matplotlib.pyplot as plt
 # Config
 # ---------------------------------------------------------------------------
 
-# Mapping from display labels to Tensorboard log directories (used only
-# with --from-tensorboard).
+# All Tensorboard log directories to scan
 SWEEP_RUNS = {
+    # Alpha/lr sweep (original)
     "sweep_alpha1.0_lr3e-4": "runs/sweep_alpha1.0_lr3e-4/tb",
     "sweep_alpha0.5_lr1e-3": "runs/sweep_alpha0.5_lr1e-3/tb",
     "sweep_alpha0.1_lr3e-4": "runs/sweep_alpha0.1_lr3e-4/tb",
+    # Lambda sweep
+    "sweep_lambda_0.05": "runs/sweep_lambda_0.05/tb",
+    "sweep_lambda_0.1": "runs/sweep_lambda_0.1/tb",
+    "sweep_lambda_0.2": "runs/sweep_lambda_0.2/tb",
+    # Primary 2k runs
+    "cql_2k": "runs/cql_2k/tb",
+    "iql_2k": "runs/iql_2k/tb",
 }
 
-# Display labels keyed by run directory name (used for legend).
-# Ordered best-to-worst so colors are intuitive:
-#   green = best policy, blue = middle, red = worst.
+# Display labels
 DISPLAY_LABELS = {
-    "sweep_alpha0.5_lr1e-3": r"$\alpha=0.5$, lr=1e-3 (best)",
-    "sweep_alpha1.0_lr3e-4": r"$\alpha=1.0$, lr=3e-4",
-    "sweep_alpha0.1_lr3e-4": r"$\alpha=0.1$, lr=3e-4",
+    "sweep_alpha0.5_lr1e-3": r"CQL $\alpha=0.5$, lr=1e-3 (best)",
+    "sweep_alpha1.0_lr3e-4": r"CQL $\alpha=1.0$, lr=3e-4",
+    "sweep_alpha0.1_lr3e-4": r"CQL $\alpha=0.1$, lr=3e-4",
+    "sweep_lambda_0.05": r"CQL $\lambda=0.05$",
+    "sweep_lambda_0.1": r"CQL $\lambda=0.1$",
+    "sweep_lambda_0.2": r"CQL $\lambda=0.2$",
+    "cql_2k": "CQL (2k corpus)",
+    "iql_2k": "IQL (2k corpus)",
 }
 
-# Semantic colors: green = best (highest accuracy + efficiency),
-# blue = middle (accurate but over-retrieves),
-# red = worst (inaccurate, stops too early).
-COLORS = ["#2ecc71", "#3498db", "#e74c3c"]
+COLORS = {
+    "sweep_alpha0.5_lr1e-3": "#2ecc71",
+    "sweep_alpha1.0_lr3e-4": "#3498db",
+    "sweep_alpha0.1_lr3e-4": "#e74c3c",
+    "sweep_lambda_0.05": "#3498db",
+    "sweep_lambda_0.1": "#2ecc71",
+    "sweep_lambda_0.2": "#e74c3c",
+    "cql_2k": "#2c3e50",
+    "iql_2k": "#e67e22",
+}
 
-METRICS = [
+CQL_METRICS = [
     ("loss/total", "Total Loss"),
     ("loss/td", "TD Loss (Bellman Error)"),
     ("loss/conservative_penalty", "Conservative Penalty"),
     ("q_values/mean", "Mean Q-Value"),
 ]
 
+# CQL sweep group: alpha/lr sweep + primary runs
+CQL_SWEEP_RUNS = [
+    "sweep_alpha0.5_lr1e-3",
+    "sweep_alpha1.0_lr3e-4",
+    "sweep_alpha0.1_lr3e-4",
+    "cql_2k",
+    "iql_2k",
+]
+
+# Lambda sweep group
+LAMBDA_SWEEP_RUNS = [
+    "sweep_lambda_0.05",
+    "sweep_lambda_0.1",
+    "sweep_lambda_0.2",
+]
+
 JSON_PATH = "data/sweep_results.json"
 OUTPUT_DIR = "figures"
-EMA_WEIGHT = 0.9  # Exponential moving average smoothing
+EMA_WEIGHT = 0.9
 
 
 # ---------------------------------------------------------------------------
@@ -70,29 +106,24 @@ EMA_WEIGHT = 0.9  # Exponential moving average smoothing
 def load_from_json(path: str) -> dict:
     """Load pre-extracted scalar data from JSON.
 
-    Returns dict keyed by display label, each containing tag -> (steps, values).
-    Ordering follows DISPLAY_LABELS (best-to-worst) for consistent legend colors.
+    Returns dict keyed by run_name (not display label) with
+    {tag: (steps, values)} entries.
     """
     with open(path) as f:
         raw = json.load(f)
 
     result = {}
-    for run_name, label in DISPLAY_LABELS.items():
-        if run_name not in raw:
-            continue
-        result[label] = {}
+    for run_name in raw:
+        result[run_name] = {}
         for tag, points in raw[run_name].items():
             steps = [p[0] for p in points]
             values = [p[1] for p in points]
-            result[label][tag] = (steps, values)
+            result[run_name][tag] = (steps, values)
     return result
 
 
 def load_from_tensorboard() -> dict:
-    """Load scalar data directly from Tensorboard event files.
-
-    Also updates data/sweep_results.json for other teammates.
-    """
+    """Load scalar data directly from Tensorboard event files."""
     from tensorboard.backend.event_processing import event_accumulator
 
     raw = {}
@@ -107,17 +138,17 @@ def load_from_tensorboard() -> dict:
         ea.Reload()
 
         raw[run_name] = {}
-        label = DISPLAY_LABELS[run_name]
-        result[label] = {}
+        result[run_name] = {}
 
         for tag in ea.Tags().get("scalars", []):
             events = ea.Scalars(tag)
             steps = [e.step for e in events]
             values = [e.value for e in events]
             raw[run_name][tag] = list(zip(steps, values))
-            result[label][tag] = (steps, values)
+            result[run_name][tag] = (steps, values)
 
-        print(f"  Loaded {label}: {len(result[label])} tags")
+        label = DISPLAY_LABELS.get(run_name, run_name)
+        print(f"  Loaded {label}: {len(result[run_name])} tags")
 
     # Write JSON for reproducibility
     os.makedirs(os.path.dirname(JSON_PATH), exist_ok=True)
@@ -129,7 +160,7 @@ def load_from_tensorboard() -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Plotting
+# Plotting helpers
 # ---------------------------------------------------------------------------
 
 def smooth(values: list, weight: float = EMA_WEIGHT) -> list:
@@ -142,48 +173,58 @@ def smooth(values: list, weight: float = EMA_WEIGHT) -> list:
     return smoothed
 
 
-def plot(all_data: dict) -> None:
-    """Create 4-panel training curves figure."""
+def plot_group(
+    all_data: dict,
+    run_names: list,
+    metrics: list,
+    title: str,
+    filename_base: str,
+) -> None:
+    """Create a 2x2 panel figure for a group of runs."""
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     fig, axes = plt.subplots(2, 2, figsize=(10, 7))
-    fig.suptitle(
-        "Conservative Q-Learning Training Curves (Hyperparameter Sweep)",
-        fontsize=13, fontweight="bold", y=0.98,
-    )
-
+    fig.suptitle(title, fontsize=13, fontweight="bold", y=0.98)
     flat_axes = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
 
-    for (tag, title), ax in zip(METRICS, flat_axes):
-        for (label, run_data), color in zip(all_data.items(), COLORS):
+    for (tag, panel_title), ax in zip(metrics, flat_axes):
+        for run_name in run_names:
+            if run_name not in all_data:
+                continue
+            run_data = all_data[run_name]
             if tag not in run_data:
                 continue
+            color = COLORS.get(run_name, "#666666")
+            label = DISPLAY_LABELS.get(run_name, run_name)
             steps, values = run_data[tag]
-            ax.plot(steps, values, color=color, alpha=0.3, linewidth=0.8)
-            ax.plot(
-                steps, smooth(values), color=color,
-                linewidth=2.0, label=label,
-            )
-        ax.set_title(title, fontsize=11)
+
+            ax.plot(steps, values, color=color, alpha=0.15, linewidth=0.5)
+            ax.plot(steps, smooth(values), color=color,
+                    linewidth=1.8, label=label)
+
+        ax.set_title(panel_title, fontsize=11)
         ax.set_xlabel("Epoch", fontsize=9)
         ax.grid(True, alpha=0.3)
         ax.tick_params(labelsize=8)
 
-    # Shared legend
+    # Shared legend below the figure
     handles, labels = flat_axes[0].get_legend_handles_labels()
-    fig.legend(
-        handles, labels, loc="lower center", ncol=3, fontsize=10,
-        frameon=True, bbox_to_anchor=(0.5, -0.02),
-    )
+    if handles:
+        fig.legend(
+            handles, labels, loc="lower center",
+            ncol=min(3, len(handles)), fontsize=9,
+            frameon=True, bbox_to_anchor=(0.5, -0.02),
+        )
 
-    plt.tight_layout(rect=[0, 0.04, 1, 0.96])
+    plt.tight_layout(rect=[0, 0.06, 1, 0.96])
 
-    png_path = os.path.join(OUTPUT_DIR, "training_curves.png")
-    pdf_path = os.path.join(OUTPUT_DIR, "training_curves.pdf")
+    png_path = os.path.join(OUTPUT_DIR, f"{filename_base}.png")
+    pdf_path = os.path.join(OUTPUT_DIR, f"{filename_base}.pdf")
     plt.savefig(png_path, dpi=300, bbox_inches="tight", facecolor="white")
     plt.savefig(pdf_path, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
 
-    print(f"\n  Saved: {png_path}")
+    print(f"  Saved: {png_path}")
     print(f"  Saved: {pdf_path}")
 
 
@@ -193,7 +234,7 @@ def plot(all_data: dict) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate training curves figure.",
+        description="Generate training curves figures.",
     )
     parser.add_argument(
         "--from-tensorboard", action="store_true",
@@ -215,7 +256,25 @@ def main() -> None:
         print("No data found.")
         return
 
-    plot(all_data)
+    print("\n  --- CQL Hyperparameter Sweep ---")
+    plot_group(
+        all_data,
+        run_names=CQL_SWEEP_RUNS,
+        metrics=CQL_METRICS,
+        title=r"Training Curves: CQL Hyperparameter Sweep ($\alpha$, lr)",
+        filename_base="training_curves_cql_sweep",
+    )
+
+    print("\n  --- Lambda Sweep ---")
+    plot_group(
+        all_data,
+        run_names=LAMBDA_SWEEP_RUNS,
+        metrics=CQL_METRICS,
+        title=r"Training Curves: Step Cost ($\lambda$) Sweep",
+        filename_base="training_curves_lambda_sweep",
+    )
+
+    print("\n  Done.")
 
 
 if __name__ == "__main__":
