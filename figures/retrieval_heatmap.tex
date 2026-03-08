@@ -1,0 +1,67 @@
+% R43: Retrieval Heatmap — Per-Chunk Retrieval Frequency (top 30 chunks by CQL frequency)
+% Usage: \input{figures/retrieval_heatmap.tex} inside a figure environment
+% Requires: \usepackage{pgfplots}, \usepackage{colortbl}, \usepackage{xcolor}
+% Note: Shows top 30 most-retrieved chunks (by CQL frequency). For a compact
+% procedure-level aggregation, use retrieval_heatmap_compact.tex instead.
+
+\definecolor{heat0}{RGB}{255,255,229}
+\definecolor{heat1}{RGB}{254,227,145}
+\definecolor{heat2}{RGB}{254,196,79}
+\definecolor{heat3}{RGB}{254,153,41}
+\definecolor{heat4}{RGB}{236,112,20}
+\definecolor{heat5}{RGB}{204,76,2}
+\definecolor{heat6}{RGB}{153,52,4}
+
+\newcommand{\hm}[1]{%
+  \ifdim #1pt < 0.05pt \cellcolor{white}\else
+  \ifdim #1pt < 0.10pt \cellcolor{heat0}\else
+  \ifdim #1pt < 0.20pt \cellcolor{heat1}\else
+  \ifdim #1pt < 0.30pt \cellcolor{heat2}\else
+  \ifdim #1pt < 0.40pt \cellcolor{heat3}\else
+  \ifdim #1pt < 0.50pt \cellcolor{heat4}\else
+  \ifdim #1pt < 0.60pt \cellcolor{heat5}\else
+                        \cellcolor{heat6}\fi\fi\fi\fi\fi\fi\fi
+  {\scriptsize #1}%
+}
+
+\begin{tikzpicture}
+\node[inner sep=0pt] {
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{r|cccccc}
+\textbf{Chunk} & \textbf{CQL} & \textbf{IQL} & \textbf{BC} & \textbf{FK(3)} & \textbf{FK(5)} & \textbf{Heur.} \\
+\hline
+168 & \hm{0.67} & \hm{0.09} & \hm{0.67} & \hm{0.17} & \hm{0.28} & \hm{0.15} \\
+109 & \hm{0.64} & \hm{0.10} & \hm{0.64} & \hm{0.10} & \hm{0.14} & \hm{0.09} \\
+090 & \hm{0.61} & \hm{0.04} & \hm{0.61} & \hm{0.07} & \hm{0.12} & \hm{0.05} \\
+106 & \hm{0.59} & \hm{0.13} & \hm{0.59} & \hm{0.14} & \hm{0.24} & \hm{0.15} \\
+158 & \hm{0.58} & \hm{0.12} & \hm{0.58} & \hm{0.19} & \hm{0.23} & \hm{0.18} \\
+128 & \hm{0.52} & \hm{0.04} & \hm{0.52} & \hm{0.09} & \hm{0.18} & \hm{0.07} \\
+084 & \hm{0.49} & \hm{0.06} & \hm{0.49} & \hm{0.10} & \hm{0.15} & \hm{0.09} \\
+130 & \hm{0.48} & \hm{0.12} & \hm{0.48} & \hm{0.13} & \hm{0.21} & \hm{0.12} \\
+129 & \hm{0.48} & \hm{0.01} & \hm{0.48} & \hm{0.01} & \hm{0.07} & \hm{0.01} \\
+140 & \hm{0.45} & \hm{0.10} & \hm{0.45} & \hm{0.10} & \hm{0.16} & \hm{0.10} \\
+083 & \hm{0.44} & \hm{0.12} & \hm{0.44} & \hm{0.10} & \hm{0.12} & \hm{0.10} \\
+003 & \hm{0.40} & \hm{0.04} & \hm{0.40} & \hm{0.03} & \hm{0.07} & \hm{0.01} \\
+081 & \hm{0.36} & \hm{0.02} & \hm{0.36} & \hm{0.06} & \hm{0.06} & \hm{0.04} \\
+149 & \hm{0.35} & \hm{0.04} & \hm{0.35} & \hm{0.05} & \hm{0.10} & \hm{0.02} \\
+162 & \hm{0.30} & \hm{0.03} & \hm{0.30} & \hm{0.03} & \hm{0.07} & \hm{0.02} \\
+042 & \hm{0.29} & \hm{0.04} & \hm{0.29} & \hm{0.10} & \hm{0.10} & \hm{0.06} \\
+163 & \hm{0.29} & \hm{0.03} & \hm{0.29} & \hm{0.02} & \hm{0.05} & \hm{0.01} \\
+068 & \hm{0.27} & \hm{0.00} & \hm{0.27} & \hm{0.00} & \hm{0.01} & \hm{0.00} \\
+185 & \hm{0.27} & \hm{0.01} & \hm{0.27} & \hm{0.01} & \hm{0.04} & \hm{0.03} \\
+098 & \hm{0.26} & \hm{0.00} & \hm{0.26} & \hm{0.00} & \hm{0.00} & \hm{0.00} \\
+079 & \hm{0.25} & \hm{0.00} & \hm{0.25} & \hm{0.00} & \hm{0.01} & \hm{0.01} \\
+152 & \hm{0.25} & \hm{0.02} & \hm{0.25} & \hm{0.07} & \hm{0.07} & \hm{0.06} \\
+030 & \hm{0.25} & \hm{0.00} & \hm{0.25} & \hm{0.00} & \hm{0.03} & \hm{0.00} \\
+138 & \hm{0.24} & \hm{0.04} & \hm{0.24} & \hm{0.02} & \hm{0.04} & \hm{0.03} \\
+031 & \hm{0.24} & \hm{0.01} & \hm{0.24} & \hm{0.01} & \hm{0.04} & \hm{0.00} \\
+139 & \hm{0.23} & \hm{0.04} & \hm{0.23} & \hm{0.06} & \hm{0.08} & \hm{0.06} \\
+165 & \hm{0.23} & \hm{0.01} & \hm{0.23} & \hm{0.04} & \hm{0.06} & \hm{0.01} \\
+142 & \hm{0.23} & \hm{0.07} & \hm{0.23} & \hm{0.07} & \hm{0.07} & \hm{0.07} \\
+150 & \hm{0.23} & \hm{0.03} & \hm{0.23} & \hm{0.01} & \hm{0.09} & \hm{0.01} \\
+173 & \hm{0.23} & \hm{0.04} & \hm{0.23} & \hm{0.09} & \hm{0.15} & \hm{0.04} \\
+\end{tabular}
+};
+\end{tikzpicture}

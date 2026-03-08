@@ -1,0 +1,91 @@
+% R45: Training Curves — CQL and IQL Primary Runs
+% Usage: \input{figures/training_curves_primary.tex} inside a figure environment
+% Requires: \usepackage{pgfplots} and \pgfplotsset{compat=1.18}
+
+\definecolor{cqlPrimary}{RGB}{44,62,80}  % dark navy
+\definecolor{iqlPrimary}{RGB}{230,126,34}  % orange
+
+\begin{tikzpicture}
+\begin{groupplot}[
+    group style={
+        group size=2 by 2,
+        horizontal sep=1.4cm,
+        vertical sep=1.4cm,
+    },
+    width=0.5\textwidth,
+    height=5cm,
+    tick label style={font=\footnotesize},
+    label style={font=\small},
+    title style={font=\small\bfseries},
+    xlabel={Epoch},
+    xlabel style={font=\small},
+    ymajorgrids=true,
+    grid style={gray!30},
+    legend style={
+        font=\scriptsize,
+        draw=gray!50,
+        fill=white,
+        fill opacity=0.9,
+        at={(0.97,0.97)},
+        anchor=north east,
+    },
+]
+
+% --- CQL: Total Loss (top-left) ---
+\nextgroupplot[
+    title={CQL: Total Loss},
+    ylabel={Loss},
+    xmin=0, xmax=200,
+    ymin=1.5, ymax=2.7,
+]
+\addplot[thick, color=cqlPrimary, mark=none, smooth] coordinates {
+    (1, 1.8712) (15, 2.387) (29, 2.2805) (43, 2.0074) (57, 1.8635)
+    (72, 1.8267) (86, 1.7987) (100, 1.6906) (114, 1.7715) (128, 1.721)
+    (143, 1.6813) (157, 1.6684) (171, 1.6897) (185, 1.6732) (200, 1.7008)
+};
+\addlegendentry{CQL (2k corpus)}
+
+% --- IQL: Q-Network TD Loss (top-right) ---
+\nextgroupplot[
+    title={IQL: Q-Network TD Loss},
+    ylabel={Loss},
+    xmin=0, xmax=1000,
+    ymin=0, ymax=0.08,
+]
+\addplot[thick, color=iqlPrimary, mark=none, smooth] coordinates {
+    (1, 0.0425) (72, 0.0707) (143, 0.0583) (215, 0.0586) (286, 0.0588)
+    (357, 0.0425) (429, 0.0338) (500, 0.0273) (571, 0.039) (643, 0.023)
+    (714, 0.0237) (785, 0.0221) (857, 0.0273) (928, 0.027) (1000, 0.0124)
+};
+\addlegendentry{IQL (2k corpus)}
+
+% --- CQL: TD Loss (bottom-left) ---
+\nextgroupplot[
+    title={CQL: TD Loss},
+    ylabel={Loss},
+    xmin=0, xmax=200,
+    ymin=0.2, ymax=0.7,
+]
+\addplot[thick, color=cqlPrimary, mark=none, smooth] coordinates {
+    (1, 0.4867) (15, 0.3017) (29, 0.3238) (43, 0.4539) (57, 0.5747)
+    (72, 0.6576) (86, 0.6075) (100, 0.5217) (114, 0.5415) (128, 0.4962)
+    (143, 0.4628) (157, 0.4613) (171, 0.4765) (185, 0.4643) (200, 0.4809)
+};
+\addlegendentry{CQL (2k corpus)}
+
+% --- IQL: Policy Loss AWR (bottom-right) ---
+\nextgroupplot[
+    title={IQL: Policy Loss (AWR)},
+    ylabel={Loss},
+    xmin=0, xmax=1000,
+    ymin=0, ymax=4.5,
+]
+\addplot[thick, color=iqlPrimary, mark=none, smooth] coordinates {
+    (1, 0.7153) (72, 1.6134) (143, 1.7968) (215, 1.9898) (286, 4.0704)
+    (357, 1.7516) (429, 1.3659) (500, 1.0193) (571, 2.0465) (643, 1.2388)
+    (714, 1.6055) (785, 1.96) (857, 2.1782) (928, 1.0648) (1000, 0.9382)
+};
+\addlegendentry{IQL (2k corpus)}
+
+\end{groupplot}
+\end{tikzpicture}
