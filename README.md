@@ -26,6 +26,41 @@ pip install -r requirements.txt
 
 After activation, all commands in this README should be run from the repository root.
 
+## Project Structure
+
+```
+rl-adaptive-policy-retrieval/
+├── rl/                         # RL agents and environment
+│   ├── env.py                  # Gym environment (PolicyRetrievalEnv)
+│   ├── features.py             # State encoder (768-dim embeddings)
+│   ├── reward.py               # Reward function (correctness - lambda*steps)
+│   ├── q_network.py            # Q-network architecture (768->256->256->11)
+│   ├── conservative_ql_agent.py # CQL agent implementation
+│   └── iql_agent.py            # IQL agent implementation
+├── baselines/                  # Baseline retrieval policies
+│   ├── base.py                 # BaselinePolicy abstract class
+│   ├── fixed_k.py              # FixedK(k) policy
+│   ├── heuristic.py            # Confidence-threshold heuristic
+│   ├── epsilon_greedy.py       # Epsilon-greedy exploration policy
+│   └── bc.py                   # Behavioral cloning policy
+├── simulator/                  # PA simulator and data pipeline
+│   ├── pa_simulator.py         # Main PASimulator class
+│   ├── chunker.py              # Document chunker
+│   ├── parser.py               # CMS data parser
+│   ├── oracle.py               # Deterministic decision oracle
+│   ├── retriever.py            # Embedding-based retriever
+│   ├── request_generator.py    # Synthetic request generator
+│   └── types.py                # Data type definitions
+├── evaluation/                 # Evaluation metrics and harness
+│   ├── metrics.py              # Accuracy, bootstrap CI, etc.
+│   └── eval_harness.py         # Evaluation orchestration
+├── scripts/                    # CLI scripts for training, eval, figures
+├── tests/                      # Unit and integration tests
+├── data/                       # Datasets, evaluation outputs, corpus stats
+├── figures/                    # Generated publication-quality figures
+└── runs/                       # Training checkpoints and Tensorboard logs (gitignored)
+```
+
 ### Key Components
 
 - **PA Simulator** — Generates synthetic prior authorization requests with deterministic oracle decisions based on CMS Medicare coverage rules
@@ -165,8 +200,12 @@ python -m scripts.plot_training_curves --from-tensorboard
 python -m scripts.plot_per_procedure
 ```
 
-**Convergence analysis:**
+**Analysis and diagnostics:**
 
 ```bash
-python -m scripts.analyze_convergence
+python -m scripts.analyze_convergence      # training convergence analysis
+python -m scripts.sanity_check             # end-to-end pipeline sanity check
+python -m scripts.compute_dataset_stats    # offline dataset statistics
+python -m scripts.generate_corpus_stats    # corpus coverage statistics
+python -m scripts.analyze_corpus_difficulty # corpus solvability analysis
 ```
