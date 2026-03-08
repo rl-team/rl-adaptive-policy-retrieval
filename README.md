@@ -85,45 +85,91 @@ CQL significantly outperforms all baselines at p<0.001 (paired t-test). IQL is t
 
 ## Reproducibility
 
-This repository includes everything needed to reproduce our results without retraining:
+All trained model checkpoints, evaluation results, offline datasets, and statistical tests are committed to the repository. An external reader can clone this repo and immediately run evaluations or regenerate figures without any training. Alternatively, everything can be retrained from scratch using the documented commands below.
 
-**Pre-trained checkpoints** (committed to the repo):
-- `runs/cql_2k/checkpoint.pt` — CQL agent (alpha=1.0, lr=3e-4, 200 epochs)
-- `runs/iql_2k/checkpoint.pt` — IQL agent (tau=0.9, beta=10.0, lr=1e-3, 1000 epochs)
-- `runs/bc_2k/checkpoint.pt` — BC policy (lr=1e-3, 200 epochs)
-- `runs/sweep_lambda_0.05/checkpoint.pt` — CQL with step_cost=0.05
-- `runs/sweep_lambda_0.1/checkpoint.pt` — CQL with step_cost=0.1
-- `runs/sweep_lambda_0.2/checkpoint.pt` — CQL with step_cost=0.2
+### Committed Checkpoints
 
-**Pre-computed data** (committed to the repo):
+Trained model checkpoints (all produced with `--seed 42`):
+
+| Checkpoint | Algorithm | Key Hyperparameters |
+|------------|-----------|---------------------|
+| `runs/cql_2k/checkpoint.pt` | CQL | 200 epochs, alpha=1.0, lr=3e-4 |
+| `runs/iql_2k/checkpoint.pt` | IQL | 1000 epochs, tau=0.9, beta=10.0, lr=1e-3 |
+| `runs/bc_2k/checkpoint.pt` | BC | 200 epochs, lr=1e-3 |
+| `runs/sweep_lambda_0.05/checkpoint.pt` | CQL | lambda=0.05 ablation |
+| `runs/sweep_lambda_0.1/checkpoint.pt` | CQL | lambda=0.1 ablation |
+| `runs/sweep_lambda_0.2/checkpoint.pt` | CQL | lambda=0.2 ablation |
+
+### Committed Data
+
 - `data/offline_buffer_2k.pkl` — 2000-episode offline dataset (seed=42)
 - `data/test_set_200.pkl` — 200-episode held-out test set (seed=99)
-- `data/eval_results_final.json` — Full evaluation results (200 episodes, seed=42)
+- `data/eval_results_final.json` — Full on-policy evaluation results (200 episodes, seed=42)
 - `data/sweep_results.json` — Training curves data (extracted from Tensorboard)
 - `data/significance.json` — Statistical significance test results
 - `data/ope_results.json` — Off-policy evaluation results (WIS + FQE)
 
-**To reproduce all figures from committed data** (no training required):
+### Option A: Use Committed Checkpoints (recommended)
+
+Run evaluations and generate figures directly from committed checkpoints and data — no training required:
 
 ```bash
+# Re-run full 6-policy evaluation using committed checkpoints:
+python -m scripts.run_full_eval
+
+# Re-run lambda ablation evaluation using committed sweep checkpoints:
+python -m scripts.plot_lambda_ablation
+
+# Re-run off-policy evaluation (WIS + FQE):
+python -m scripts.run_ope
+
+# Re-run statistical significance tests:
+python -m scripts.compute_significance
+
+# Regenerate all figures from committed data:
 python -m scripts.plot_pareto              # Pareto frontier (accuracy vs steps)
 python -m scripts.plot_retrieval_heatmap   # Retrieval pattern heatmap
 python -m scripts.plot_training_curves     # Training curves (from sweep_results.json)
 python -m scripts.plot_per_procedure       # Per-procedure accuracy breakdown
-python -m scripts.compute_significance     # Statistical significance tests
 ```
 
-**To reproduce evaluations from committed checkpoints** (requires ~2 min):
+### Option B: Retrain Everything from Scratch
+
+To reproduce the full pipeline from raw data collection through training and evaluation (all scripts use `--seed 42`):
 
 ```bash
-python -m scripts.run_full_eval            # 6-policy on-policy evaluation (seed=42)
-python -m scripts.plot_lambda_ablation     # Lambda ablation (loads sweep checkpoints)
-python -m scripts.run_ope                  # Off-policy evaluation (WIS + FQE)
+# 1. Collect offline dataset (seed=42):
+python -m scripts.collect_offline_dataset --episodes 2000 --output data/offline_buffer_2k.pkl --seed 42
+
+# 2. Collect held-out test set (seed=99):
+python -m scripts.collect_offline_dataset --episodes 200 --output data/test_set_200.pkl --seed 99
+
+# 3. Train all agents:
+python -m scripts.train_conservative_ql --dataset data/offline_buffer_2k.pkl \
+    --epochs 200 --alpha 1.0 --lr 3e-4 --seed 42 --output runs/cql_2k
+python -m scripts.train_iql --dataset data/offline_buffer_2k.pkl \
+    --epochs 1000 --tau 0.9 --beta 10.0 --lr 1e-3 --seed 42 --output runs/iql_2k
+python -m scripts.train_bc --dataset data/offline_buffer_2k.pkl \
+    --epochs 200 --lr 1e-3 --seed 42 --output runs/bc_2k
+
+# 4. Lambda ablation (collects separate buffers per step cost, then trains CQL):
+bash scripts/train_lambda_sweep.sh
+
+# 5. Run full evaluation pipeline:
+python -m scripts.run_full_eval            # On-policy eval (writes data/eval_results_final.json)
+python -m scripts.run_ope                  # Off-policy eval (writes data/ope_results.json)
+python -m scripts.compute_significance     # Statistical tests (writes data/significance.json)
+python -m scripts.plot_lambda_ablation     # Lambda ablation figure
+python -m scripts.plot_training_curves --from-tensorboard  # Extract TB logs to JSON + plot
+
+# 6. Generate all figures:
+python -m scripts.plot_pareto
+python -m scripts.plot_retrieval_heatmap
+python -m scripts.plot_per_procedure
+
+# 7. Monitor training (optional):
+tensorboard --logdir runs/
 ```
-
-**To retrain from scratch** (optional, ~1 hour):
-
-See the "Collect offline dataset and train" section below. All training scripts use deterministic seeds for reproducibility.
 
 ## Data
 
@@ -201,15 +247,15 @@ python -m scripts.collect_offline_dataset --episodes 200 --output data/test_set_
 
 # Train CQL:
 python -m scripts.train_conservative_ql --dataset data/offline_buffer_2k.pkl \
-    --epochs 200 --alpha 1.0 --lr 3e-4 --output runs/cql_2k
+    --epochs 200 --alpha 1.0 --lr 3e-4 --seed 42 --output runs/cql_2k
 
 # Train IQL:
 python -m scripts.train_iql --dataset data/offline_buffer_2k.pkl \
-    --epochs 1000 --tau 0.9 --beta 10.0 --lr 1e-3 --output runs/iql_2k
+    --epochs 1000 --tau 0.9 --beta 10.0 --lr 1e-3 --seed 42 --output runs/iql_2k
 
 # Train BC:
 python -m scripts.train_bc --dataset data/offline_buffer_2k.pkl \
-    --epochs 200 --lr 1e-3 --output runs/bc_2k
+    --epochs 200 --lr 1e-3 --seed 42 --output runs/bc_2k
 
 # Lambda ablation (collect separate buffers for each step cost):
 bash scripts/train_lambda_sweep.sh
