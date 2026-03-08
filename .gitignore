@@ -28,8 +28,21 @@ Thumbs.db
 !data/offline_buffer_2k.pkl
 !data/test_set_200.pkl
 
-# Tensorboard logs
+# Tensorboard logs and training artifacts
 runs/
+# Exception: trained checkpoints needed for reproducibility
+!runs/cql_2k/
+!runs/cql_2k/checkpoint.pt
+!runs/iql_2k/
+!runs/iql_2k/checkpoint.pt
+!runs/bc_2k/
+!runs/bc_2k/checkpoint.pt
+!runs/sweep_lambda_0.05/
+!runs/sweep_lambda_0.05/checkpoint.pt
+!runs/sweep_lambda_0.1/
+!runs/sweep_lambda_0.1/checkpoint.pt
+!runs/sweep_lambda_0.2/
+!runs/sweep_lambda_0.2/checkpoint.pt
 
 # CMS MCD data
 *.pdf
