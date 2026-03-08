@@ -48,6 +48,48 @@ On-policy evaluation (200 episodes, seed=42, 186-chunk corpus, 10 CMS procedures
 
 CQL significantly outperforms all baselines at p<0.001 (paired t-test). IQL is the only policy with positive episodic return.
 
+## Reproducibility
+
+This repository includes everything needed to reproduce our results without retraining:
+
+**Pre-trained checkpoints** (committed to the repo):
+- `runs/cql_2k/checkpoint.pt` — CQL agent (alpha=1.0, lr=3e-4, 200 epochs)
+- `runs/iql_2k/checkpoint.pt` — IQL agent (tau=0.9, beta=10.0, lr=1e-3, 1000 epochs)
+- `runs/bc_2k/checkpoint.pt` — BC policy (lr=1e-3, 200 epochs)
+- `runs/sweep_lambda_0.05/checkpoint.pt` — CQL with step_cost=0.05
+- `runs/sweep_lambda_0.1/checkpoint.pt` — CQL with step_cost=0.1
+- `runs/sweep_lambda_0.2/checkpoint.pt` — CQL with step_cost=0.2
+
+**Pre-computed data** (committed to the repo):
+- `data/offline_buffer_2k.pkl` — 2000-episode offline dataset (seed=42)
+- `data/test_set_200.pkl` — 200-episode held-out test set (seed=99)
+- `data/eval_results_final.json` — Full evaluation results (200 episodes, seed=42)
+- `data/sweep_results.json` — Training curves data (extracted from Tensorboard)
+- `data/significance.json` — Statistical significance test results
+- `data/ope_results.json` — Off-policy evaluation results (WIS + FQE)
+
+**To reproduce all figures from committed data** (no training required):
+
+```bash
+python -m scripts.plot_pareto              # Pareto frontier (accuracy vs steps)
+python -m scripts.plot_retrieval_heatmap   # Retrieval pattern heatmap
+python -m scripts.plot_training_curves     # Training curves (from sweep_results.json)
+python -m scripts.plot_per_procedure       # Per-procedure accuracy breakdown
+python -m scripts.compute_significance     # Statistical significance tests
+```
+
+**To reproduce evaluations from committed checkpoints** (requires ~2 min):
+
+```bash
+python -m scripts.run_full_eval            # 6-policy on-policy evaluation (seed=42)
+python -m scripts.plot_lambda_ablation     # Lambda ablation (loads sweep checkpoints)
+python -m scripts.run_ope                  # Off-policy evaluation (WIS + FQE)
+```
+
+**To retrain from scratch** (optional, ~1 hour):
+
+See the "Collect offline dataset and train" section below. All training scripts use deterministic seeds for reproducibility.
+
 ## Data
 
 Uses publicly available [CMS Medicare Coverage Database](https://www.cms.gov/medicare-coverage-database/search.aspx) (Local Coverage Determinations, National Coverage Determinations, and billing Articles). Policy documents are chunked at the paragraph level and embedded using sentence-transformers. Synthetic PA request scenarios are generated with deterministic oracle decisions.
@@ -161,7 +203,7 @@ python -m scripts.compute_significance
 python -m scripts.plot_pareto
 python -m scripts.plot_retrieval_heatmap
 python -m scripts.plot_lambda_ablation
-python -m scripts.plot_training_curves --from-tensorboard
+python -m scripts.plot_training_curves
 python -m scripts.plot_per_procedure
 ```
 
