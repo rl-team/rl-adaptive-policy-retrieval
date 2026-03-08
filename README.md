@@ -162,6 +162,7 @@ python -m scripts.plot_pareto
 python -m scripts.plot_retrieval_heatmap
 python -m scripts.plot_lambda_ablation
 python -m scripts.plot_training_curves --from-tensorboard
+python -m scripts.plot_per_procedure
 ```
 
 **Convergence analysis:**
