@@ -24,6 +24,7 @@ import time
 from pathlib import Path
 
 import numpy as np
+import torch
 
 from rl.conservative_ql_agent import ConservativeQLAgent, ReplayBuffer
 
@@ -51,6 +52,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--target-update-freq", type=int, default=10)
     parser.add_argument("--grad-clip", type=float, default=1.0)
     parser.add_argument("--log-every", type=int, default=10)
+    parser.add_argument("--seed", type=int, default=42,
+                        help="Random seed for reproducibility (default: 42).")
 
     # Architecture
     parser.add_argument("--state-dim", type=int, default=768)
@@ -81,6 +84,12 @@ def load_buffer(path: str) -> ReplayBuffer:
 def main() -> None:
     args = parse_args()
 
+    # -- Set seeds for reproducibility --
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(args.seed)
+
     # -- Load dataset --
     print("=" * 70)
     print("  Conservative Q-Learning Training")
@@ -92,6 +101,7 @@ def main() -> None:
     print(f"  Alpha:      {args.alpha}")
     print(f"  LR:         {args.lr}")
     print(f"  Gamma:      {args.gamma}")
+    print(f"  Seed:       {args.seed}")
 
     buf = load_buffer(args.dataset)
     print(f"\n  Buffer loaded: {len(buf)} transitions")

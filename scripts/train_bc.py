@@ -22,6 +22,7 @@ import time
 from pathlib import Path
 
 import numpy as np
+import torch
 
 from baselines.bc import BehavioralCloningPolicy
 from rl.conservative_ql_agent import ReplayBuffer
@@ -51,11 +52,19 @@ def parse_args() -> argparse.Namespace:
                         help="Print progress every N epochs.")
     parser.add_argument("--output", type=str, default="runs/bc_2k",
                         help="Output directory for checkpoint.")
+    parser.add_argument("--seed", type=int, default=42,
+                        help="Random seed for reproducibility (default: 42).")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+
+    # -- Set seeds for reproducibility --
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(args.seed)
 
     print("=" * 70)
     print("  Behavioral Cloning Training")
