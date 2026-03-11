@@ -233,8 +233,9 @@ def main() -> None:
             plt.Line2D([0], [0], color="#2c3e50", linewidth=2.0,
                        linestyle="--", alpha=0.7, label="Pareto frontier")
         )
-        ax1.legend(handles=legend_handles, loc="center left",
-                   fontsize=9, framealpha=0.9)
+        ax1.legend(handles=legend_handles, loc="upper left",
+                   fontsize=8, framealpha=0.9,
+                   bbox_to_anchor=(0.0, 0.98))
 
         fig.suptitle(
             "Accuracy vs Retrieval Efficiency",
