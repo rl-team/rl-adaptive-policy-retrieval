@@ -214,9 +214,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--agent-type", type=str, default="cql",
-        choices=["cql", "iql"],
+        choices=["cql", "iql", "dpo"],
         help="Agent type: 'cql' for Conservative Q-Learning, "
-             "'iql' for Implicit Q-Learning (default: cql).",
+             "'iql' for Implicit Q-Learning, "
+             "'dpo' for Direct Preference Optimization (default: cql).",
     )
     parser.add_argument("--episodes", type=int, default=50,
                         help="Episodes per policy.")
@@ -263,6 +264,11 @@ def main() -> None:
             agent_name = "IQL"
             print(f"  Agent loaded (tau={agent.tau}, beta={agent.beta}, "
                   f"gamma={agent.gamma})")
+        elif args.agent_type == "dpo":
+            from rl.dpo_agent import DPOAgent
+            agent = DPOAgent.load(args.checkpoint)
+            agent_name = "DPO"
+            print(f"  Agent loaded (beta={agent.beta})")
         else:
             raise ValueError(f"Unknown agent type: {args.agent_type}")
 
